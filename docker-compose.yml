@@ -38,7 +38,7 @@ services:
     environment:
       - NPM_CONFIG_CACHE=/app/.npm-cache
     working_dir: /app
-    command: sh -c "npm install && NODE_ENV=production npm run build"
+    command: sh -c "npm install && NODE_ENV=production npm run build:package"
     networks:
       - security_web_network
 

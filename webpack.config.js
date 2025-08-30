@@ -2,76 +2,92 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
-  entry: {
-    popup: './src/popup/index.tsx',
-    background: './src/background/index.ts',
-    content: './src/content/index.ts',
-    warning: './src/warning/index.tsx',
-  },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: {
-          loader: 'ts-loader',
-          options: {
-            transpileOnly: true,
-          }
-        },
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader', 'postcss-loader'],
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
+module.exports = (env, argv) => {
+  const browser = env.browser || 'chrome';
+  const isFirefox = browser === 'firefox';
+  
+  return {
+    entry: {
+      popup: './src/popup/index.tsx',
+      background: './src/background/index.ts',
+      content: './src/content/index.ts',
+      warning: './src/warning/index.tsx',
     },
-  },
-  output: {
-    filename: '[name]/index.js',
-    path: path.resolve(__dirname, 'dist/build'),
-    clean: true,
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/popup/popup.html',
-      filename: 'popup/popup.html',
-      chunks: ['popup'],
-    }),
-    new HtmlWebpackPlugin({
-      template: './public/popup/warning.html',
-      filename: 'popup/warning.html',
-      chunks: ['warning'],
-    }),
-    new CopyPlugin({
-      patterns: [
+    module: {
+      rules: [
         {
-          from: 'public',
-          to: '.',
-          globOptions: {
-            ignore: ['**/.*', '**/popup/warning.html'],
+          test: /\.tsx?$/,
+          use: {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+            }
           },
+          exclude: /node_modules/,
+        },
+        {
+          test: /\.css$/i,
+          use: ['style-loader', 'css-loader', 'postcss-loader'],
         },
       ],
-    }),
-  ],
-  optimization: {
-    minimize: false, // Desabilitar minificação temporariamente para debug
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
+    },
+    resolve: {
+      extensions: ['.tsx', '.ts', '.js'],
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+    },
+    output: {
+      filename: '[name]/index.js',
+      path: path.resolve(__dirname, `dist/build/${browser}`),
+      clean: false, // Desabilitar limpeza automática para evitar problemas de permissão
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './src/popup/popup.html',
+        filename: 'popup/popup.html',
+        chunks: ['popup'],
+      }),
+      new HtmlWebpackPlugin({
+        template: './public/popup/warning.html',
+        filename: 'popup/warning.html',
+        chunks: ['warning'],
+      }),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: 'public',
+            to: '.',
+            globOptions: {
+              ignore: [
+                '**/.*', 
+                '**/popup/warning.html',
+                '**/manifest-chrome.json',
+                '**/manifest-firefox.json',
+                '**/manifest.json'
+              ],
+            },
+          },
+          // Copiar o manifest específico do browser como manifest.json
+          {
+            from: isFirefox ? 'public/manifest-firefox.json' : 'public/manifest-chrome.json',
+            to: 'manifest.json',
+          },
+        ],
+      }),
+    ],
+    optimization: {
+      minimize: false, // Desabilitar minificação temporariamente para debug
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
         },
       },
     },
-  },
+  };
 };

@@ -39,45 +39,84 @@ npm run build
 
 2. Build da extensão:
 ```bash
-./docker.sh build
-# ou
-make docker-build
+# Build para ambos os navegadores
+npm run build
+
+# Build específico para Chrome (Manifest V3)
+npm run build:chrome
+
+# Build específico para Firefox (Manifest V2) 
+npm run build:firefox
+
+# Build completo + empacotamento
+npm run build:package
 ```
 
-4. Carregue a extensão no navegador:
-   - **Chrome**: Vá para `chrome://extensions/`, ative o modo desenvolvedor e clique em "Carregar extensão expandida", selecionando a pasta `dist/build`
-   - **Firefox**: Vá para `about:debugging`, clique em "Este Firefox" e "Carregar extensão temporária", selecionando qualquer arquivo da pasta `dist/build`
+3. Carregar a extensão no navegador:
+   - **Chrome**: Vá para `chrome://extensions/`, ative o modo desenvolvedor e clique em "Carregar extensão expandida", selecionando a pasta `dist/build/chrome`
+   - **Firefox**: Vá para `about:debugging`, clique em "Este Firefox" e "Carregar extensão temporária", selecionando o arquivo `dist/build/firefox/manifest.json`
 
 ## Estrutura de Build
 
-- `dist/build/`: Contém os arquivos da extensão prontos para instalação
-- `dist/extension/`: Contém o arquivo ZIP da extensão para distribuição
+A extensão é agora construída com suporte nativo para Chrome e Firefox:
+
+```
+dist/
+├── build/
+│   ├── chrome/          # Build para Chrome (Manifest V3)
+│   │   ├── manifest.json
+│   │   ├── background/
+│   │   ├── content/
+│   │   └── popup/
+│   └── firefox/         # Build para Firefox (Manifest V2)
+│       ├── manifest.json
+│       ├── background/
+│       ├── content/
+│       └── popup/
+└── extension/
+    ├── chrome/
+    │   └── security-web-extension.zip
+    └── firefox/
+        └── security-web-extension.zip
+```
 
 ## Scripts Disponíveis
 
-### Scripts Nativos
-- `npm run dev`: Build em modo desenvolvimento com watch
-- `npm run build`: Build para produção
-- `npm run build:firefox`: Build específico para Firefox
+### Scripts de Build
+- `npm run dev`: Build em modo desenvolvimento com watch (Chrome)
+- `npm run dev:chrome`: Build em modo desenvolvimento para Chrome
+- `npm run dev:firefox`: Build em modo desenvolvimento para Firefox
+- `npm run build`: Build para produção (Chrome + Firefox)
+- `npm run build:chrome`: Build específico para Chrome (Manifest V3)
+- `npm run build:firefox`: Build específico para Firefox (Manifest V2)
+
+### Scripts de Empacotamento
+- `npm run package:chrome`: Empacota extensão Chrome em ZIP
+- `npm run package:firefox`: Empacota extensão Firefox em ZIP
+- `npm run build:package`: Build completo + empacotamento para ambos
+
+### Scripts de Qualidade
 - `npm run lint`: Verificação de código
 - `npm run type-check`: Verificação de tipos TypeScript
-- `npm run package`: Empacota extensão em ZIP
 
 ### Scripts Docker
 - `npm run docker:dev`: Desenvolvimento no Docker
 - `npm run docker:build`: Build no Docker
 - `npm run docker:test`: Testes no Docker
-- `npm run docker:package`: Empacotamento no Docker
+- `npm run docker:package`: Build e empacotamento completo no Docker
 
-### Scripts de Conveniência
-- `./dev.sh [comando]`: Script principal de desenvolvimento
-- `./docker.sh [comando]`: Gerenciamento Docker
-- `make [target]`: Comandos via Makefile
+## Diferenças entre Chrome e Firefox
 
-### Comandos Make
-- `make setup`: Setup inicial completo
-- `make dev`: Desenvolvimento local
-- `make docker-dev`: Desenvolvimento no Docker
+### Chrome (Manifest V3)
+- Utiliza `service_worker` para background
+- API `action` para extensão popup
+- Permissões `host_permissions` separadas
+
+### Firefox (Manifest V2)
+- Utiliza `background.scripts` array
+- API `browser_action` para extensão popup
+- Inclui configuração `applications.gecko` para Firefox Add-ons
+- Permissões integradas no array principal
 - `make all`: Build + package completo
 - `make docker-all`: Build + package no Docker
 
