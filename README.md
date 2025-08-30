@@ -75,9 +75,9 @@ dist/
 │       └── popup/
 └── extension/
     ├── chrome/
-    │   └── security-web-extension.zip
+    │   └── security-web-extension-chrome.zip
     └── firefox/
-        └── security-web-extension.zip
+        └── security-web-extension-firefox.zip
 ```
 
 ## Scripts Disponíveis

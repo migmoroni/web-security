@@ -17,7 +17,7 @@ package_browser() {
     local browser=$1
     local build_path="$BUILD_DIR/$browser"
     local extension_path="$EXTENSION_DIR/$browser"
-    local zip_file="$extension_path/security-web-extension.zip"
+    local zip_file="$extension_path/security-web-extension-$browser.zip"
     
     echo "Empacotando para $browser..."
     
