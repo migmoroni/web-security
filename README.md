@@ -39,61 +39,64 @@ npm run build
 
 2. Build da extensão:
 ```bash
-# Build para ambos os navegadores
+# Build para ambos os motores
 npm run build
 
-# Build específico para Chrome (Manifest V3)
-npm run build:chrome
+# Build específico para Blink (Chromium, Chrome, Edge, Brave, Opera)
+npm run build:blink
 
-# Build específico para Firefox (Manifest V2) 
-npm run build:firefox
+# Build específico para Gecko (Firefox, LibreWolf) 
+npm run build:gecko
 
 # Build completo + empacotamento
 npm run build:package
 ```
 
 3. Carregar a extensão no navegador:
-   - **Chrome**: Vá para `chrome://extensions/`, ative o modo desenvolvedor e clique em "Carregar extensão expandida", selecionando a pasta `dist/build/chrome`
-   - **Firefox**: Vá para `about:debugging`, clique em "Este Firefox" e "Carregar extensão temporária", selecionando o arquivo `dist/build/firefox/manifest.json`
+   - **Blink (Chrome/Chromium/Edge/Brave/Opera)**: Vá para `chrome://extensions/`, ative o modo desenvolvedor e clique em "Carregar extensão expandida", selecionando a pasta `dist/build/blink`
+   - **Gecko (Firefox/LibreWolf)**: Vá para `about:debugging`, clique em "Este Firefox" e "Carregar extensão temporária", selecionando o arquivo `dist/build/gecko/manifest.json`
 
 ## Estrutura de Build
 
-A extensão é agora construída com suporte nativo para Chrome e Firefox:
+A extensão é agora construída com suporte nativo para diferentes motores de navegadores:
 
 ```
 dist/
 ├── build/
-│   ├── chrome/          # Build para Chrome (Manifest V3)
-│   │   ├── manifest.json
+│   ├── blink/           # Build para Blink (Chromium, Chrome, Edge, Brave, Opera)
+│   │   ├── manifest.json (Manifest V3)
 │   │   ├── background/
 │   │   ├── content/
 │   │   └── popup/
-│   └── firefox/         # Build para Firefox (Manifest V2)
-│       ├── manifest.json
+│   └── gecko/           # Build para Gecko (Firefox, LibreWolf)
+│       ├── manifest.json (Manifest V2)
 │       ├── background/
 │       ├── content/
 │       └── popup/
 └── extension/
-    ├── chrome/
-    │   └── security-web-extension-chrome.zip
-    └── firefox/
-        └── security-web-extension-firefox.zip
+    ├── security-web-extension.zip              # Se builds são idênticos
+    ├── security-web-extension-blink.zip        # Se builds diferem
+    └── security-web-extension-gecko.zip        # Se builds diferem
 ```
 
 ## Scripts Disponíveis
 
 ### Scripts de Build
-- `npm run dev`: Build em modo desenvolvimento com watch (Chrome)
-- `npm run dev:chrome`: Build em modo desenvolvimento para Chrome
-- `npm run dev:firefox`: Build em modo desenvolvimento para Firefox
-- `npm run build`: Build para produção (Chrome + Firefox)
-- `npm run build:chrome`: Build específico para Chrome (Manifest V3)
-- `npm run build:firefox`: Build específico para Firefox (Manifest V2)
+- `npm run dev`: Build em modo desenvolvimento com watch (Blink)
+- `npm run dev:blink`: Build em modo desenvolvimento para Blink
+- `npm run dev:gecko`: Build em modo desenvolvimento para Gecko
+- `npm run build`: Build para produção (Blink + Gecko)
+- `npm run build:blink`: Build específico para Blink (Manifest V3)
+- `npm run build:gecko`: Build específico para Gecko (Manifest V2)
 
 ### Scripts de Empacotamento
-- `npm run package:chrome`: Empacota extensão Chrome em ZIP
-- `npm run package:firefox`: Empacota extensão Firefox em ZIP
-- `npm run build:package`: Build completo + empacotamento para ambos
+- `npm run package:blink`: Empacota extensão Blink em ZIP
+- `npm run package:gecko`: Empacota extensão Gecko em ZIP
+- `npm run build:package`: Build completo + empacotamento inteligente
+
+**Empacotamento Inteligente:**
+- Se os builds são idênticos (exceto manifest): gera `security-web-extension.zip` universal
+- Se os builds diferem: gera ZIPs específicos por motor (`-blink.zip`, `-gecko.zip`)
 
 ### Scripts de Qualidade
 - `npm run lint`: Verificação de código
@@ -105,18 +108,22 @@ dist/
 - `npm run docker:test`: Testes no Docker
 - `npm run docker:package`: Build e empacotamento completo no Docker
 
-## Diferenças entre Chrome e Firefox
+## Diferenças entre Motores de Navegadores
 
-### Chrome (Manifest V3)
+### Blink (Manifest V3)
+**Navegadores suportados:** Chromium, Google Chrome, Microsoft Edge, Brave, Opera
 - Utiliza `service_worker` para background
 - API `action` para extensão popup
 - Permissões `host_permissions` separadas
+- Máxima compatibilidade com navegadores baseados em Chromium
 
-### Firefox (Manifest V2)
+### Gecko (Manifest V2)
+**Navegadores suportados:** Mozilla Firefox, LibreWolf
 - Utiliza `background.scripts` array
 - API `browser_action` para extensão popup
 - Inclui configuração `applications.gecko` para Firefox Add-ons
 - Permissões integradas no array principal
+- Suporte nativo para APIs abertas do WebExtensions
 - `make all`: Build + package completo
 - `make docker-all`: Build + package no Docker
 

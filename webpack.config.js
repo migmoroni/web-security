@@ -3,8 +3,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = (env, argv) => {
-  const browser = env.browser || 'chrome';
-  const isFirefox = browser === 'firefox';
+  const engine = env.engine || 'blink';
+  const isGecko = engine === 'gecko';
   
   return {
     entry: {
@@ -39,7 +39,7 @@ module.exports = (env, argv) => {
     },
     output: {
       filename: '[name]/index.js',
-      path: path.resolve(__dirname, `dist/build/${browser}`),
+      path: path.resolve(__dirname, `dist/build/${engine}`),
       clean: false, // Desabilitar limpeza automática para evitar problemas de permissão
     },
     plugins: [
@@ -62,15 +62,15 @@ module.exports = (env, argv) => {
               ignore: [
                 '**/.*', 
                 '**/popup/warning.html',
-                '**/manifest-chrome.json',
-                '**/manifest-firefox.json',
+                '**/manifest-blink.json',
+                '**/manifest-gecko.json',
                 '**/manifest.json'
               ],
             },
           },
-          // Copiar o manifest específico do browser como manifest.json
+          // Copiar o manifest específico do engine como manifest.json
           {
-            from: isFirefox ? 'public/manifest-firefox.json' : 'public/manifest-chrome.json',
+            from: isGecko ? 'public/manifest-gecko.json' : 'public/manifest-blink.json',
             to: 'manifest.json',
           },
         ],
