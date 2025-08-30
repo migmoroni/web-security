@@ -64,6 +64,8 @@ module.exports = (env, argv) => {
                 '**/popup/warning.html',
                 '**/manifest-blink.json',
                 '**/manifest-gecko.json',
+                '**/manifest-chrome.json',
+                '**/manifest-firefox.json',
                 '**/manifest.json'
               ],
             },

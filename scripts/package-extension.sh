@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para empacotar a extensão Security Web Extension
+# Script para empacotar a extensão Web Security Extension
 set -e
 
 ENGINE=${1:-"both"}
@@ -8,7 +8,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/dist/build"
 EXTENSION_DIR="$ROOT_DIR/dist/extension"
 
-echo "Empacotando Security Web Extension..."
+echo "Empacotando Web Security Extension..."
 
 # Criar diretório de extensão se não existir
 mkdir -p "$EXTENSION_DIR"
@@ -44,7 +44,7 @@ builds_are_identical() {
 package_engine() {
     local engine=$1
     local build_path="$BUILD_DIR/$engine"
-    local zip_file="$EXTENSION_DIR/security-web-extension-$engine.zip"
+    local zip_file="$EXTENSION_DIR/web-security-extension-$engine.zip"
     
     echo "Empacotando para $engine..."
     
@@ -75,7 +75,7 @@ package_engine() {
 package_universal() {
     local base_engine=${1:-"blink"}
     local build_path="$BUILD_DIR/$base_engine"
-    local zip_file="$EXTENSION_DIR/security-web-extension.zip"
+    local zip_file="$EXTENSION_DIR/web-security-extension.zip"
     
     echo "Empacotando extensão universal (baseado em $base_engine)..."
     

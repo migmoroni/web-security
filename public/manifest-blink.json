@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Security Web Analyzer",
+  "name": "Web Security Analyzer",
   "version": "1.0.0",
   "description": "Analisa sites em busca de possíveis ameaças de segurança antes de abri-los. Compatível com Chromium, Chrome, Edge, Brave, Opera",
   "permissions": [
@@ -24,7 +24,7 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Security Web Analyzer",
+    "default_title": "Web Security Analyzer",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",

@@ -42,7 +42,7 @@ const Popup: React.FC = () => {
                 <span className="text-2xl">🛡️</span>
               </div>
               <h2 className="text-lg font-semibold text-gray-900">
-                Security Web Analyzer
+                Web Security Analyzer
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Proteção ativa contra sites suspeitos

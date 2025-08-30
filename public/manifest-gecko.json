@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Security Web Analyzer",
+  "name": "Web Security Analyzer",
   "version": "1.0.0",
   "description": "Analisa sites em busca de possíveis ameaças de segurança antes de abri-los. Compatível com Firefox, LibreWolf",
   "permissions": [
@@ -22,7 +22,7 @@
   ],
   "browser_action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Security Web Analyzer",
+    "default_title": "Web Security Analyzer",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -39,7 +39,7 @@
   "web_accessible_resources": ["icons/*"],
   "applications": {
     "gecko": {
-      "id": "security-web-analyzer@example.com",
+      "id": "web-security-analyzer@example.com",
       "strict_min_version": "42.0"
     }
   }

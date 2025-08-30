@@ -1,5 +1,5 @@
 {
-  "name": "security-web-extension",
+  "name": "web-security-extension",
   "version": "1.0.0",
   "description": "Extensão de navegador para análise de segurança de websites",
   "main": "index.js",

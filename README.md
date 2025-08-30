@@ -1,6 +1,8 @@
 # Security Web Extension
 
-Uma extensão de navegador para análise de segurança de websites em tempo real.
+# Web Security Extension
+
+Extensão de navegador para análise de segurança web com suporte para múltiplos motores de navegadores (Blink e Gecko).
 
 ## Funcionalidades
 
@@ -74,9 +76,9 @@ dist/
 │       ├── content/
 │       └── popup/
 └── extension/
-    ├── security-web-extension.zip              # Se builds são idênticos
-    ├── security-web-extension-blink.zip        # Se builds diferem
-    └── security-web-extension-gecko.zip        # Se builds diferem
+    ├── web-security-extension.zip              # Se builds são idênticos
+    ├── web-security-extension-blink.zip        # Se builds diferem
+    └── web-security-extension-gecko.zip        # Se builds diferem
 ```
 
 ## Scripts Disponíveis
@@ -95,7 +97,7 @@ dist/
 - `npm run build:package`: Build completo + empacotamento inteligente
 
 **Empacotamento Inteligente:**
-- Se os builds são idênticos (exceto manifest): gera `security-web-extension.zip` universal
+- Se os builds são idênticos (exceto manifest): gera `web-security-extension.zip` universal
 - Se os builds diferem: gera ZIPs específicos por motor (`-blink.zip`, `-gecko.zip`)
 
 ### Scripts de Qualidade
