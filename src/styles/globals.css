@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos customizados para a extensão */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animações customizadas */
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.warning-pulse {
+  animation: pulse-warning 1.5s ease-in-out infinite;
+}
+
+/* Estilos para links com indicadores de segurança */
+a[data-security-warning="high"] {
+  position: relative;
+}
+
+a[data-security-warning="high"]::after {
+  content: "⚠️";
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+}
+
+a[data-security-warning="medium"] {
+  position: relative;
+}
+
+a[data-security-warning="medium"]::after {
+  content: "⚡";
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+}

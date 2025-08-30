@@ -1,0 +1,26 @@
+# Docker Compose Override - Opcional
+# Copie este arquivo para docker-compose.override.yml e personalize conforme necessário
+
+version: '3.8'
+
+services:
+  dev:
+    # Personalizar porta se necessário
+    ports:
+      - "3001:3000"  # Mudar porta se 3000 estiver ocupada
+    
+    # Adicionar variáveis de ambiente personalizadas
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - DEBUG=security-web:*  # Para logs de debug detalhados
+    
+    # Adicionar volumes extras se necessário
+    # volumes:
+    #   - ./custom-config:/app/config
+
+  build:
+    # Configurações específicas para build
+    environment:
+      - NODE_ENV=production
+      - BUILD_TARGET=chrome  # ou 'firefox'

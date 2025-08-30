@@ -1,0 +1,52 @@
+{
+  "name": "security-web-extension",
+  "version": "1.0.0",
+  "description": "Extensão de navegador para análise de segurança de websites",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack --mode=development --watch",
+    "build": "webpack --mode=production",
+    "build:firefox": "npm run build && web-ext build --source-dir=dist/build --artifacts-dir=dist/extension",
+    "package": "scripts/package-extension.sh",
+    "build:package": "npm run build && npm run package",
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "type-check": "tsc --noEmit",
+    "docker:dev": "docker compose up dev",
+    "docker:build": "docker compose run --rm build",
+    "docker:test": "docker compose run --rm test",
+    "docker:package": "docker compose run --rm -T build npm run build && docker compose run --rm -T build scripts/package-extension.sh"
+  },
+  "keywords": [
+    "security",
+    "browser-extension",
+    "web-safety"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "autoprefixer": "^10.4.19",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^7.1.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "html-webpack-plugin": "^5.6.0",
+    "postcss": "^8.4.38",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.5",
+    "web-ext": "^8.9.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

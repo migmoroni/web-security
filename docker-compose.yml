@@ -1,0 +1,89 @@
+
+services:
+  # Ambiente de desenvolvimento principal
+  dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: security-web-dev
+    volumes:
+      - .:/app
+      - security_web_node_modules:/app/node_modules
+      - ./dist:/app/dist
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - NPM_CONFIG_CACHE=/app/.npm-cache
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    networks:
+      - security_web_network
+
+  # Container para build de produção
+  build:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: security-web-build
+    volumes:
+      - .:/app
+      - security_web_build_modules:/app/node_modules
+      - ./dist:/app/dist
+    environment:
+      - NPM_CONFIG_CACHE=/app/.npm-cache
+    working_dir: /app
+    command: sh -c "npm install && NODE_ENV=production npm run build"
+    networks:
+      - security_web_network
+
+  # Container para testes e linting
+  test:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: security-web-test
+    volumes:
+      - .:/app
+      - security_web_test_modules:/app/node_modules
+    environment:
+      - NODE_ENV=test
+      - NPM_CONFIG_CACHE=/app/.npm-cache
+    working_dir: /app
+    command: sh -c "npm install && npm run lint"
+    networks:
+      - security_web_network
+
+  # Container para empacotamento
+  package:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: security-web-package
+    volumes:
+      - .:/app
+      - security_web_package_modules:/app/node_modules
+      - ./dist:/app/dist
+    environment:
+      - NPM_CONFIG_CACHE=/app/.npm-cache
+    working_dir: /app
+    command: sh -c "npm ci && scripts/package-extension.sh"
+    networks:
+      - security_web_network
+
+volumes:
+  security_web_node_modules:
+  security_web_build_modules:
+  security_web_test_modules:
+  security_web_package_modules:
+
+networks:
+  security_web_network:
+    driver: bridge

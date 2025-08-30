@@ -1,0 +1,43 @@
+FROM node:18-alpine as base
+
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache \
+    git \
+    bash \
+    zip \
+    imagemagick \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Instalar dependências globais úteis para desenvolvimento
+RUN npm install -g nodemon concurrently
+
+FROM base as development
+
+# Copiar arquivos de configuração primeiro (para melhor cache)
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY webpack.config.js ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+COPY .eslintrc.js ./
+
+# Instalar dependências
+RUN npm install
+
+# Comando para desenvolvimento (será sobrescrito pelo docker-compose)
+CMD ["npm", "run", "dev"]
+
+FROM base as production
+
+# Copiar apenas o necessário para produção
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+# Comando para produção
+CMD ["node", "dist/build/background/index.js"]
