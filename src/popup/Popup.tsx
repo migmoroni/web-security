@@ -8,10 +8,19 @@ const Popup: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'status' | 'config' | 'design' | 'history'>('status');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [analysisCount, setAnalysisCount] = useState<number>(0);
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     getCurrentTab();
     getAnalysisCount();
+  }, []);
+
+  useEffect(() => {
+    const applyTheme = async () => {
+      const config = await StorageService.getDesignConfig();
+      setTheme(config.theme);
+    };
+    applyTheme();
   }, []);
 
   const getCurrentTab = async () => {
@@ -49,29 +58,29 @@ const Popup: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-3 bg-primary-100 rounded-full flex items-center justify-center">
                 <span className="text-2xl">🛡️</span>
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Web Security Analyzer
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Proteção ativa contra sites suspeitos
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-3">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
               <div className="text-sm">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Status:</span>
-                  <span className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs font-medium">
+                  <span className="text-gray-600 dark:text-gray-300">Status:</span>
+                  <span className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs font-medium dark:bg-success-900 dark:text-success-200">
                     Ativo
                   </span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">URLs analisadas:</span>
-                  <span className="font-medium text-gray-900">{analysisCount}</span>
+                  <span className="text-gray-600 dark:text-gray-300">URLs analisadas:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{analysisCount}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Site atual:</span>
-                  <span className="font-medium text-gray-900 text-xs truncate ml-2 max-w-32">
+                  <span className="text-gray-600 dark:text-gray-300">Site atual:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100 text-xs truncate ml-2 max-w-32">
                     {new URL(currentUrl || 'about:blank').hostname}
                   </span>
                 </div>
@@ -107,11 +116,11 @@ const Popup: React.FC = () => {
             <div className="flex items-center mb-4">
               <button
                 onClick={() => setActiveTab('status')}
-                className="text-gray-600 hover:text-gray-900 mr-3"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mr-3"
               >
                 ← Voltar
               </button>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 ⚙️ Configurações do Sistema
               </h3>
             </div>
@@ -125,11 +134,11 @@ const Popup: React.FC = () => {
             <div className="flex items-center mb-4">
               <button
                 onClick={() => setActiveTab('status')}
-                className="text-gray-600 hover:text-gray-900 mr-3"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mr-3"
               >
                 ← Voltar
               </button>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 🎨 Configurações de Design
               </h3>
             </div>
@@ -143,11 +152,11 @@ const Popup: React.FC = () => {
             <div className="flex items-center p-4 pb-2">
               <button
                 onClick={() => setActiveTab('status')}
-                className="text-gray-600 hover:text-gray-900 mr-3"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mr-3"
               >
                 ← Voltar
               </button>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 📋 Histórico de Análises
               </h3>
             </div>
@@ -179,8 +188,8 @@ const Popup: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full bg-white">
-      <div className="border-b border-gray-200">
+    <div className={`w-full h-full bg-white dark:bg-gray-800 ${theme}`}>
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="flex">
           {[
             { id: 'status', label: 'Status', icon: '🏠' },
@@ -193,8 +202,8 @@ const Popup: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex-1 px-3 py-2 text-sm font-medium text-center border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-primary-500 text-primary-600 bg-primary-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'border-primary-500 text-primary-600 bg-primary-50 dark:bg-gray-700 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
               }`}
             >
               <span className="mr-1">{tab.icon}</span>

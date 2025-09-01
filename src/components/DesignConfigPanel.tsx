@@ -90,20 +90,20 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
     
     // Aplicar tema
     if (designConfig.theme === 'dark') {
-      root.classList.add('dark-theme');
-      root.classList.remove('light-theme');
+      root.classList.add('dark');
+      root.classList.remove('light');
     } else if (designConfig.theme === 'light') {
-      root.classList.add('light-theme');
-      root.classList.remove('dark-theme');
+      root.classList.add('light');
+      root.classList.remove('dark');
     } else {
       // auto - detectar preferência do sistema
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (prefersDark) {
-        root.classList.add('dark-theme');
-        root.classList.remove('light-theme');
+        root.classList.add('dark');
+        root.classList.remove('light');
       } else {
-        root.classList.add('light-theme');
-        root.classList.remove('dark-theme');
+        root.classList.add('light');
+        root.classList.remove('dark');
       }
     }
 
@@ -171,17 +171,17 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Carregando configurações...</div>;
+    return <div className="p-4 text-center dark:text-gray-300">Carregando configurações...</div>;
   }
 
   return (
     <div className="space-y-6">
       {/* Tema */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">🎨 Tema</h3>
+      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3 dark:text-gray-100">🎨 Tema</h3>
         <div className="space-y-2">
           {(['light', 'dark', 'auto'] as const).map((theme) => (
-            <label key={theme} className="flex items-center space-x-2">
+            <label key={theme} className="flex items-center space-x-2 dark:text-gray-300">
               <input
                 type="radio"
                 name="theme"
@@ -199,10 +199,10 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
       </div>
 
       {/* Indicadores Visuais */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">👁️ Indicadores Visuais</h3>
+      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3 dark:text-gray-100">👁️ Indicadores Visuais</h3>
         
-        <label className="flex items-center space-x-2 mb-4">
+        <label className="flex items-center space-x-2 mb-4 dark:text-gray-300">
           <input
             type="checkbox"
             checked={config.visualIndicators.enabled}
@@ -214,7 +214,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
 
         {config.visualIndicators.enabled && (
           <div className="space-y-4">
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center space-x-2 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={config.visualIndicators.showSafeLinks}
@@ -225,11 +225,11 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             </label>
 
             {/* Esquema de Cores - movido para cá */}
-            <div className="mt-4 p-3 bg-white rounded border">
-              <h4 className="text-sm font-medium mb-3">Esquemas de Cores</h4>
+            <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-600">
+              <h4 className="text-sm font-medium mb-3 dark:text-gray-200">Esquemas de Cores</h4>
               <div className="space-y-2">
                 {(Object.keys(colorSchemePresets) as Array<keyof typeof colorSchemePresets>).map((scheme) => (
-                  <label key={scheme} className="flex items-center space-x-3 text-sm">
+                  <label key={scheme} className="flex items-center space-x-3 text-sm dark:text-gray-300">
                     <input
                       type="radio"
                       name="colorScheme"
@@ -266,7 +266,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Opacidade do Background</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-300">Opacidade do Background</label>
               <input
                 type="range"
                 min="0.1"
@@ -279,10 +279,10 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
                 })}
                 className="w-full"
               />
-              <span className="text-sm text-gray-600">{Math.round(config.visualIndicators.style.backgroundOpacity * 100)}%</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{Math.round(config.visualIndicators.style.backgroundOpacity * 100)}%</span>
             </div>
 
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center space-x-2 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={config.visualIndicators.style.textContrast}
@@ -298,7 +298,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             {/* Cores Personalizadas */}
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Cor Seguro</label>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Cor Seguro</label>
                 <input
                   type="color"
                   value={config.visualIndicators.colors.safe}
@@ -310,7 +310,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Cor Suspeito</label>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Cor Suspeito</label>
                 <input
                   type="color"
                   value={config.visualIndicators.colors.suspicious}
@@ -322,7 +322,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Cor Perigoso</label>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Cor Perigoso</label>
                 <input
                   type="color"
                   value={config.visualIndicators.colors.dangerous}
@@ -336,8 +336,8 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             </div>
 
             {/* Preview dos indicadores */}
-            <div className="mt-4 p-3 bg-white rounded border">
-              <h4 className="text-sm font-medium mb-2">Prévia dos Indicadores:</h4>
+            <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-600">
+              <h4 className="text-sm font-medium mb-2 dark:text-gray-200">Prévia dos Indicadores:</h4>
               <div className="space-y-2">
                 <a 
                   href="#" 
@@ -376,10 +376,10 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
       </div>
 
       {/* Acessibilidade */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">♿ Acessibilidade</h3>
+      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3 dark:text-gray-100">♿ Acessibilidade</h3>
         <div className="space-y-3">
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-2 dark:text-gray-300">
             <input
               type="checkbox"
               checked={config.accessibility.reduceMotion}
@@ -389,7 +389,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             <span>Reduzir animações</span>
           </label>
           
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-2 dark:text-gray-300">
             <input
               type="checkbox"
               checked={config.accessibility.highContrast}
@@ -399,7 +399,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             <span>Alto contraste</span>
           </label>
           
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-2 dark:text-gray-300">
             <input
               type="checkbox"
               checked={config.accessibility.largeText}
@@ -409,7 +409,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             <span>Texto maior</span>
           </label>
           
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-2 dark:text-gray-300">
             <input
               type="checkbox"
               checked={config.accessibility.keyboardNavigation}
@@ -422,7 +422,7 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
       </div>
 
       {/* Reset */}
-      <div className="pt-4 border-t">
+      <div className="pt-4 border-t dark:border-gray-600">
         <button
           onClick={resetToDefaults}
           className="w-full p-2 bg-red-600 text-white rounded hover:bg-red-700"
