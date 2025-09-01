@@ -1,4 +1,6 @@
 import { SecurityAnalysisResult } from '@/types';
+import { SecurityAnalyzer } from '@/analyzers';
+import { NavigationMonitorService } from '@/services/NavigationMonitorService';
 
 interface SecurityWarningMessage {
   type: 'SHOW_SECURITY_WARNING';
@@ -21,14 +23,64 @@ interface UserDecisionMessage {
   };
 }
 
-type Message = SecurityWarningMessage | UserDecisionMessage;
+interface NavigationBlockedMessage {
+  type: 'NAVIGATION_BLOCKED';
+  data: {
+    url: string;
+    source: string;
+    timestamp: number;
+  };
+}
 
-// Escutar mensagens do content script
+interface AllowNavigationMessage {
+  type: 'ALLOW_NAVIGATION';
+  data: {
+    url: string;
+    tabId: number;
+  };
+}
+
+type Message = SecurityWarningMessage | UserDecisionMessage | NavigationBlockedMessage | AllowNavigationMessage;
+
+// Inicializar serviço de monitoramento de navegação
+NavigationMonitorService.initialize();
+
+// Escutar mensagens do content script e páginas
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  // Só interceptar navegação principal (não frames)
+  if (details.frameId !== 0) return;
+
+  try {
+    console.log('🔍 Interceptando navegação para:', details.url);
+    
+    // Analisar URL antes da navegação
+    const analysis = await SecurityAnalyzer.analyzeUrl(details.url);
+    
+    if (analysis.isSuspicious) {
+      console.log('🚨 URL suspeita detectada na navegação:', details.url);
+      
+      // Redirecionar para página de bloqueio
+      const blockedUrl = chrome.runtime.getURL('blocked.html') + 
+                        `?url=${encodeURIComponent(details.url)}&analysis=${encodeURIComponent(JSON.stringify(analysis))}`;
+      
+      chrome.tabs.update(details.tabId, { url: blockedUrl });
+    }
+  } catch (error) {
+    console.error('Erro na análise de navegação:', error);
+    // Em caso de erro, permitir navegação normal
+  }
+});
+
+// Escutar mensagens do content script e páginas
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
   if (message.type === 'SHOW_SECURITY_WARNING') {
     showSecurityWarning(message.data);
   } else if (message.type === 'USER_DECISION') {
     handleUserDecision(message.data);
+  } else if (message.type === 'NAVIGATION_BLOCKED') {
+    console.log('📊 Navegação bloqueada registrada:', message.data);
+  } else if (message.type === 'ALLOW_NAVIGATION') {
+    NavigationMonitorService.allowNavigation(message.data.url, message.data.tabId);
   }
 });
 

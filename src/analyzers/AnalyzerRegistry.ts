@@ -1,4 +1,7 @@
-import { SecurityIssue } from '@/types';
+import { SecurityIssue } from '../types';
+import { DomainSimilarityAnalyzer } from './DomainSimilarityAnalyzer';
+import { MixedScriptAnalyzer } from './MixedScriptAnalyzer';
+import { ExternalThreatAnalyzer } from './ExternalThreatAnalyzer';
 
 export interface AnalyzerModule {
   name: string;
@@ -103,6 +106,38 @@ export const createPhishingAnalyzer = (): AnalyzerModule => ({
     }
 
     return issues;
+  },
+  isEnabled: async (): Promise<boolean> => true
+});
+
+export const createDomainSimilarityAnalyzer = (): AnalyzerModule => ({
+  name: 'domain-similarity',
+  version: '1.0.0',
+  analyze: async (url: string): Promise<SecurityIssue[]> => {
+    const analyzer = new DomainSimilarityAnalyzer();
+    const hostname = new URL(url).hostname.toLowerCase();
+    return await analyzer.analyze(hostname);
+  },
+  isEnabled: async (): Promise<boolean> => true
+});
+
+export const createMixedScriptAnalyzer = (): AnalyzerModule => ({
+  name: 'mixed-script',
+  version: '1.0.0',
+  analyze: async (url: string): Promise<SecurityIssue[]> => {
+    const analyzer = new MixedScriptAnalyzer();
+    const hostname = new URL(url).hostname.toLowerCase();
+    return await analyzer.analyze(hostname);
+  },
+  isEnabled: async (): Promise<boolean> => true
+});
+
+export const createExternalThreatAnalyzer = (): AnalyzerModule => ({
+  name: 'external-threat-intelligence',
+  version: '1.0.0',
+  analyze: async (url: string): Promise<SecurityIssue[]> => {
+    const analyzer = new ExternalThreatAnalyzer();
+    return await analyzer.analyze(url);
   },
   isEnabled: async (): Promise<boolean> => true
 });

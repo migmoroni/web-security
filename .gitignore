@@ -14,6 +14,11 @@ web-ext-artifacts/
 dist/build/
 dist/extension/
 
+# Chaves de API e configurações sensíveis
+src/config/api-keys.ts
+*.api-keys.ts
+.env.api
+
 # Arquivos Docker
 .docker/
 docker-compose.override.yml

@@ -1,5 +1,9 @@
 import { SecurityAnalyzer } from '@/analyzers';
 import { StorageService } from '@/services';
+import { NavigationInterceptor } from '@/utils/NavigationInterceptor';
+
+// Inicializar interceptação de navegação para formulários e JS
+NavigationInterceptor.initialize();
 
 // Interceptar cliques em links
 document.addEventListener('click', async (event) => {

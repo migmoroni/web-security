@@ -1,6 +1,13 @@
 import { SecurityAnalysisResult, SecurityIssue } from '@/types';
 import { UnicodeAnalyzer } from './UnicodeAnalyzer';
-import { AnalyzerRegistry, createDomainReputationAnalyzer, createPhishingAnalyzer } from './AnalyzerRegistry';
+import { 
+  AnalyzerRegistry, 
+  createDomainReputationAnalyzer, 
+  createPhishingAnalyzer,
+  createDomainSimilarityAnalyzer,
+  createMixedScriptAnalyzer,
+  createExternalThreatAnalyzer
+} from './AnalyzerRegistry';
 
 export class SecurityAnalyzer {
   private static initialized = false;
@@ -9,8 +16,11 @@ export class SecurityAnalyzer {
     if (this.initialized) return;
     
     // Registrar analisadores disponíveis
+    AnalyzerRegistry.register(createExternalThreatAnalyzer()); // Primeiro - PhishTank + VirusTotal
     AnalyzerRegistry.register(createDomainReputationAnalyzer());
     AnalyzerRegistry.register(createPhishingAnalyzer());
+    AnalyzerRegistry.register(createDomainSimilarityAnalyzer());
+    AnalyzerRegistry.register(createMixedScriptAnalyzer());
     
     this.initialized = true;
   }

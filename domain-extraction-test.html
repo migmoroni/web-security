@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Extração de Domínio - Web Security Analyzer</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 900px; 
+            margin: 0 auto;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .safe-section { 
+            background: #d4edda; 
+            border-left: 4px solid #28a745; 
+        }
+        .suspicious-section { 
+            background: #f8d7da; 
+            border-left: 4px solid #dc3545; 
+        }
+        .test-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 5px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .url-display {
+            font-family: 'Courier New', monospace;
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            word-break: break-all;
+        }
+        .extraction-result {
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .test-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .test-link:hover { text-decoration: underline; }
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,123,255,0.1);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Extração de Domínio Principal</h1>
+        
+        <p>Esta página demonstra como o <strong>Web Security Analyzer</strong> extrai corretamente o domínio principal, 
+        ignorando subdomínios e paths para evitar falsos positivos.</p>
+
+        <div class="test-section safe-section">
+            <h2>✅ URLs Legítimas (Não devem gerar alertas)</h2>
+            
+            <div class="test-item">
+                <h3>🔐 Google - Login OAuth</h3>
+                <div class="url-display">https://accounts.google.com/o/oauth2/auth/oauthchooseaccount</div>
+                <div class="extraction-result">Domínio extraído: google.com</div>
+                <a href="https://accounts.google.com/o/oauth2/auth/oauthchooseaccount" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    ✅ <strong>Esperado:</strong> Sem alertas. O sistema deve extrair "google.com" e reconhecer como legítimo.
+                </div>
+            </div>
+
+            <div class="test-item">
+                <h3>📧 Microsoft - Login Empresarial</h3>
+                <div class="url-display">https://login.microsoftonline.com/common/oauth2/v2.0/authorize</div>
+                <div class="extraction-result">Domínio extraído: microsoftonline.com</div>
+                <a href="https://login.microsoftonline.com/common/oauth2/v2.0/authorize" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    ✅ <strong>Esperado:</strong> Sem alertas. Subdomínio legítimo da Microsoft.
+                </div>
+            </div>
+
+            <div class="test-item">
+                <h3>🛒 Amazon - Produto com Path Longo</h3>
+                <div class="url-display">https://www.amazon.com.br/dp/B08N5WRWNW/ref=sr_1_1?keywords=laptop</div>
+                <div class="extraction-result">Domínio extraído: amazon.com.br</div>
+                <a href="https://www.amazon.com.br/dp/B08N5WRWNW/ref=sr_1_1?keywords=laptop" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    ✅ <strong>Esperado:</strong> Sem alertas. TLD composto (.com.br) tratado corretamente.
+                </div>
+            </div>
+
+            <div class="test-item">
+                <h3>💾 GitHub - Repositório</h3>
+                <div class="url-display">https://github.com/microsoft/vscode/blob/main/src/extension.ts</div>
+                <div class="extraction-result">Domínio extraído: github.com</div>
+                <a href="https://github.com/microsoft/vscode/blob/main/src/extension.ts" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    ✅ <strong>Esperado:</strong> Sem alertas. Path complexo ignorado, foco no domínio principal.
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section suspicious-section">
+            <h2>🚨 URLs Suspeitas (Devem gerar alertas)</h2>
+
+            <div class="test-item">
+                <h3>⚠️ Google Falso com Subdomínio</h3>
+                <div class="url-display">https://accounts.gооglе.com/signin/oauth</div>
+                <div class="extraction-result">Domínio extraído: gооglе.com (cyrillic 'о')</div>
+                <a href="https://accounts.gооglе.com/signin/oauth" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    🚨 <strong>Esperado:</strong> Alerta de homóglifos cyrillic + alta similaridade com google.com
+                </div>
+            </div>
+
+            <div class="test-item">
+                <h3>⚠️ Amazon Typosquatting</h3>
+                <div class="url-display">https://www.arnazon.com/dp/B08N5WRWNW/ref=sr_1_1</div>
+                <div class="extraction-result">Domínio extraído: arnazon.com</div>
+                <a href="https://www.arnazon.com/dp/B08N5WRWNW/ref=sr_1_1" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    🚨 <strong>Esperado:</strong> Alerta de alta similaridade com amazon.com (diferença: 'rn' → 'm')
+                </div>
+            </div>
+
+            <div class="test-item">
+                <h3>⚠️ PayPal com Greek</h3>
+                <div class="url-display">https://login.ραypαl.com/signin</div>
+                <div class="extraction-result">Domínio extraído: ραypαl.com (greek ρ, α)</div>
+                <a href="https://login.ραypαl.com/signin" class="test-link">Testar Link</a>
+                <div class="explanation">
+                    🚨 <strong>Esperado:</strong> Alerta de alfabetos mistos (Greek + Latin) + similaridade com paypal.com
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Como o Sistema Funciona</h2>
+            
+            <h3>1. 📐 Extração do Domínio Principal</h3>
+            <ul>
+                <li><strong>Remove protocolos:</strong> https://, http://</li>
+                <li><strong>Remove www:</strong> www.site.com → site.com</li>
+                <li><strong>Remove subdomínios:</strong> accounts.google.com → google.com</li>
+                <li><strong>Remove paths:</strong> /signin/oauth, /dp/B08N5WRWNW</li>
+                <li><strong>Remove query params:</strong> ?keywords=laptop&ref=sr_1_1</li>
+                <li><strong>Trata TLDs compostos:</strong> site.com.br, domain.co.uk</li>
+            </ul>
+
+            <h3>2. 🔍 Análise de Segurança</h3>
+            <ul>
+                <li><strong>Whitelist automática:</strong> Domínios conhecidos são ignorados</li>
+                <li><strong>Análise de alfabetos:</strong> Detecta mistura de scripts suspeita</li>
+                <li><strong>Similaridade inteligente:</strong> Compara apenas com domínios relevantes</li>
+                <li><strong>Detecção de homóglifos:</strong> Caracteres que imitam letras latinas</li>
+            </ul>
+
+            <h3>3. 📊 Resultados Precisos</h3>
+            <ul>
+                <li><strong>Zero falsos positivos:</strong> Subdomínios legítimos não geram alertas</li>
+                <li><strong>Detecção sofisticada:</strong> Ataques complexos são identificados</li>
+                <li><strong>Explicações detalhadas:</strong> Usuário entende exatamente o problema</li>
+            </ul>
+        </div>
+
+        <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <h3>🎯 Teste Sugerido</h3>
+            <ol>
+                <li>Instale a extensão Web Security Analyzer</li>
+                <li>Clique nos links da seção <strong>"URLs Legítimas"</strong> - não deve haver alertas</li>
+                <li>Clique nos links da seção <strong>"URLs Suspeitas"</strong> - deve haver alertas detalhados</li>
+                <li>Observe que os alertas mostram o domínio extraído vs. URL original</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

@@ -55,6 +55,7 @@ module.exports = (env, argv) => {
       }),
       new CopyPlugin({
         patterns: [
+          // Copiar arquivos da pasta public, exceto manifestos específicos
           {
             from: 'public',
             to: '.',
@@ -69,6 +70,11 @@ module.exports = (env, argv) => {
                 '**/manifest.json'
               ],
             },
+          },
+          // Copiar página de bloqueio
+          {
+            from: 'public/blocked.html',
+            to: 'blocked.html',
           },
           // Copiar o manifest específico do engine como manifest.json
           {

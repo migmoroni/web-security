@@ -13,6 +13,25 @@ export interface SecurityIssue {
   details: string;
 }
 
+// Novos tipos para análise aprimorada
+export interface AnalysisResult {
+  safe: boolean;
+  threats: SecurityThreat[];
+  score: number;
+  analysis: {
+    domain: string;
+    checkedAgainst: string[];
+    timestamp: string;
+  };
+}
+
+export interface SecurityThreat {
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  details: any;
+}
+
 export interface UnicodeAnalysisResult {
   hasMixedScripts: boolean;
   scripts: string[];
