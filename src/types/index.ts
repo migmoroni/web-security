@@ -50,8 +50,22 @@ export interface AnalysisConfig {
   unicodeAnalysis: boolean;
   blockSuspiciousLinks: boolean;
   showWarnings: boolean;
-  // Novas configurações visuais
+  // Configurações visuais movidas para design
+  design: DesignConfig;
+}
+
+export interface DesignConfig {
+  theme: 'light' | 'dark' | 'auto';
+  colorScheme: 'default' | 'colorblind' | 'highContrast' | 'subtle' | 'custom';
   visualIndicators: VisualIndicatorConfig;
+  accessibility: AccessibilityConfig;
+}
+
+export interface AccessibilityConfig {
+  reduceMotion: boolean;
+  highContrast: boolean;
+  largeText: boolean;
+  keyboardNavigation: boolean;
 }
 
 export interface VisualIndicatorConfig {
@@ -66,6 +80,16 @@ export interface VisualIndicatorConfig {
     width: number;
     style: 'solid' | 'dashed' | 'dotted';
   };
+}
+
+export interface HistoryEntry {
+  id: string;
+  url: string;
+  domain: string;
+  analysis: SecurityAnalysisResult;
+  timestamp: number;
+  source: 'click' | 'navigation' | 'form' | 'popup';
+  userAction?: 'blocked' | 'proceeded' | 'ignored';
 }
 
 export interface StorageData {

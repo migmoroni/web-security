@@ -1,0 +1,146 @@
+/* Variáveis CSS para temas globais */
+:root {
+  /* Cores padrão dos indicadores */
+  --safe-color: #10b981;
+  --suspicious-color: #f59e0b;
+  --dangerous-color: #ef4444;
+  
+  /* Duração das animações */
+  --animation-duration: 0.3s;
+  
+  /* Escala do texto */
+  --font-scale: 1;
+  
+  /* Tema claro (padrão) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --accent-color: #3b82f6;
+}
+
+/* Tema escuro */
+.dark-theme {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
+  --accent-color: #60a5fa;
+}
+
+/* Aplicação global dos temas */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: calc(1rem * var(--font-scale));
+  transition: all var(--animation-duration) ease;
+}
+
+/* Indicadores visuais para links */
+a[data-security-level="safe"] {
+  border-bottom: 2px solid var(--safe-color) !important;
+}
+
+a[data-security-level="suspicious"] {
+  border-bottom: 2px solid var(--suspicious-color) !important;
+}
+
+a[data-security-level="dangerous"] {
+  border-bottom: 2px solid var(--dangerous-color) !important;
+}
+
+/* Acessibilidade - motion reduzido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Alto contraste */
+.high-contrast {
+  filter: contrast(150%);
+}
+
+/* Texto maior para acessibilidade */
+.large-text {
+  --font-scale: 1.2;
+}
+
+/* Focus melhorado para navegação por teclado */
+.keyboard-navigation *:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Estilos específicos para os componentes de configuração */
+.design-config-panel {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all var(--animation-duration) ease;
+}
+
+.design-config-panel h3 {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.design-config-panel input,
+.design-config-panel select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all var(--animation-duration) ease;
+}
+
+.design-config-panel input:focus,
+.design-config-panel select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+/* Botões de preset */
+.preset-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--animation-duration) ease;
+}
+
+.preset-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.preset-button:active {
+  transform: translateY(0);
+}
+
+/* Indicadores de status no painel de histórico */
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-safe {
+  background-color: var(--safe-color);
+}
+
+.status-suspicious {
+  background-color: var(--suspicious-color);
+}
+
+.status-dangerous {
+  background-color: var(--dangerous-color);
+}

@@ -1,9 +1,10 @@
-import { AnalysisConfig, StorageData } from '@/types';
+import { AnalysisConfig, StorageData, HistoryEntry, DesignConfig } from '@/types';
 
 export class StorageService {
   private static readonly STORAGE_KEYS = {
     CONFIG: 'security-config',
-    HISTORY: 'analysis-history'
+    HISTORY: 'analysis-history',
+    DESIGN: 'design-config'
   };
 
   static async getConfig(): Promise<AnalysisConfig> {
@@ -17,20 +18,62 @@ export class StorageService {
     });
   }
 
-  static async getAnalysisHistory(): Promise<any[]> {
+  static async getAnalysisHistory(): Promise<HistoryEntry[]> {
     const result = await chrome.storage.local.get(this.STORAGE_KEYS.HISTORY);
     return result[this.STORAGE_KEYS.HISTORY] || [];
   }
 
-  static async addAnalysisToHistory(analysis: any): Promise<void> {
+  static async addAnalysisToHistory(entry: HistoryEntry): Promise<void> {
     const history = await this.getAnalysisHistory();
-    history.unshift(analysis);
     
-    // Manter apenas os últimos 100 registros
-    const trimmedHistory = history.slice(0, 100);
+    // Adicionar nova entrada
+    history.unshift(entry);
+    
+    // Manter apenas os últimos 30 dias
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const filteredHistory = history.filter(item => item.timestamp > thirtyDaysAgo);
+    
+    // Limitar a 1000 entradas para performance
+    const trimmedHistory = filteredHistory.slice(0, 1000);
     
     await chrome.storage.local.set({
       [this.STORAGE_KEYS.HISTORY]: trimmedHistory
+    });
+  }
+
+  static async clearHistory(): Promise<void> {
+    await chrome.storage.local.set({
+      [this.STORAGE_KEYS.HISTORY]: []
+    });
+  }
+
+  static async getHistoryStats(): Promise<{
+    total: number;
+    safe: number;
+    suspicious: number;
+    dangerous: number;
+    lastWeek: number;
+  }> {
+    const history = await this.getAnalysisHistory();
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    
+    return {
+      total: history.length,
+      safe: history.filter(h => !h.analysis.isSuspicious).length,
+      suspicious: history.filter(h => h.analysis.isSuspicious && h.analysis.suspicionLevel !== 'high').length,
+      dangerous: history.filter(h => h.analysis.suspicionLevel === 'high').length,
+      lastWeek: history.filter(h => h.timestamp > oneWeekAgo).length
+    };
+  }
+
+  static async getDesignConfig(): Promise<DesignConfig> {
+    const result = await chrome.storage.sync.get(this.STORAGE_KEYS.DESIGN);
+    return result[this.STORAGE_KEYS.DESIGN] || this.getDefaultConfig().design;
+  }
+
+  static async saveDesignConfig(designConfig: DesignConfig): Promise<void> {
+    await chrome.storage.sync.set({
+      [this.STORAGE_KEYS.DESIGN]: designConfig
     });
   }
 
@@ -40,17 +83,27 @@ export class StorageService {
       unicodeAnalysis: true,
       blockSuspiciousLinks: true,
       showWarnings: true,
-      visualIndicators: {
-        enabled: true,
-        showSafeLinks: true,
-        colors: {
-          safe: '#10b981',      // Verde
-          suspicious: '#f59e0b', // Amarelo/laranja  
-          dangerous: '#ef4444'   // Vermelho
+      design: {
+        theme: 'light',
+        colorScheme: 'default',
+        visualIndicators: {
+          enabled: true,
+          showSafeLinks: true,
+          colors: {
+            safe: '#10b981',      // Verde
+            suspicious: '#f59e0b', // Amarelo/laranja  
+            dangerous: '#ef4444'   // Vermelho
+          },
+          borderStyle: {
+            width: 2,
+            style: 'solid'
+          }
         },
-        borderStyle: {
-          width: 2,
-          style: 'solid'
+        accessibility: {
+          reduceMotion: false,
+          highContrast: false,
+          largeText: false,
+          keyboardNavigation: true
         }
       }
     };

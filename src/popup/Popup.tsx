@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ConfigPanel } from '@/components';
-import { VisualConfig } from '@/components/VisualConfig';
+import { DesignConfigPanel } from '@/components/DesignConfigPanel';
+import { HistoryPanel } from '@/components/HistoryPanel';
 import { StorageService } from '@/services';
 
 const Popup: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'status' | 'config' | 'visual' | 'history'>('status');
+  const [activeTab, setActiveTab] = useState<'status' | 'config' | 'design' | 'history'>('status');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [analysisCount, setAnalysisCount] = useState<number>(0);
 
@@ -81,14 +82,14 @@ const Popup: React.FC = () => {
               onClick={() => setActiveTab('config')}
               className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-2"
             >
-              Configurar Proteção
+              ⚙️ Configurar Sistema
             </button>
             
             <button
-              onClick={() => setActiveTab('visual')}
+              onClick={() => setActiveTab('design')}
               className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium mb-2"
             >
-              🎨 Configurar Indicadores Visuais
+              🎨 Configurar Design
             </button>
             
             <button
@@ -101,9 +102,6 @@ const Popup: React.FC = () => {
         );
 
       case 'config':
-        return <ConfigPanel />;
-
-      case 'visual':
         return (
           <div className="p-4">
             <div className="flex items-center mb-4">
@@ -114,22 +112,64 @@ const Popup: React.FC = () => {
                 ← Voltar
               </button>
               <h3 className="text-lg font-semibold text-gray-900">
-                🎨 Indicadores Visuais
+                ⚙️ Configurações do Sistema
               </h3>
             </div>
-            <VisualConfig />
+            <ConfigPanel />
+          </div>
+        );
+
+      case 'design':
+        return (
+          <div className="p-4">
+            <div className="flex items-center mb-4">
+              <button
+                onClick={() => setActiveTab('status')}
+                className="text-gray-600 hover:text-gray-900 mr-3"
+              >
+                ← Voltar
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                🎨 Configurações de Design
+              </h3>
+            </div>
+            <DesignConfigPanel />
           </div>
         );
 
       case 'history':
         return (
-          <div className="p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Histórico de Análises
-            </h3>
-            <p className="text-sm text-gray-600 text-center">
-              Funcionalidade em desenvolvimento
-            </p>
+          <div>
+            <div className="flex items-center p-4 pb-2">
+              <button
+                onClick={() => setActiveTab('status')}
+                className="text-gray-600 hover:text-gray-900 mr-3"
+              >
+                ← Voltar
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                📋 Histórico de Análises
+              </h3>
+            </div>
+            <HistoryPanel />
+          </div>
+        );
+
+      case 'history':
+        return (
+          <div>
+            <div className="flex items-center p-4 pb-2">
+              <button
+                onClick={() => setActiveTab('status')}
+                className="text-gray-600 hover:text-gray-900 mr-3"
+              >
+                ← Voltar
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                📋 Histórico de Análises
+              </h3>
+            </div>
+            <HistoryPanel />
           </div>
         );
 
@@ -144,7 +184,8 @@ const Popup: React.FC = () => {
         <nav className="flex">
           {[
             { id: 'status', label: 'Status', icon: '🏠' },
-            { id: 'config', label: 'Config', icon: '⚙️' },
+            { id: 'config', label: 'Sistema', icon: '⚙️' },
+            { id: 'design', label: 'Design', icon: '🎨' },
             { id: 'history', label: 'Histórico', icon: '📋' }
           ].map((tab) => (
             <button

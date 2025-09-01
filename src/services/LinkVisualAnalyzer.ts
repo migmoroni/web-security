@@ -29,7 +29,7 @@ export class LinkVisualAnalyzer {
    */
   private static async loadConfig() {
     const storageConfig = await StorageService.getConfig();
-    this.config = storageConfig.visualIndicators || this.getDefaultConfig();
+    this.config = storageConfig.design?.visualIndicators || this.getDefaultConfig();
   }
 
   /**

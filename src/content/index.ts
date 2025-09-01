@@ -54,7 +54,16 @@ document.addEventListener('click', async (event) => {
     }
 
     // Salvar no histórico
-    await StorageService.addAnalysisToHistory(analysis);
+    const historyEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      url: link.href,
+      domain: new URL(link.href).hostname,
+      analysis,
+      timestamp: Date.now(),
+      source: 'click' as const,
+      userAction: analysis.isSuspicious ? 'blocked' as const : undefined
+    };
+    await StorageService.addAnalysisToHistory(historyEntry);
     
   } catch (error) {
     console.error('Erro na análise de segurança:', error);
@@ -76,5 +85,10 @@ window.addEventListener('beforeunload', () => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'UPDATE_VISUAL_CONFIG') {
     LinkVisualAnalyzer.updateConfig(message.data);
+  } else if (message.type === 'UPDATE_DESIGN_CONFIG') {
+    // Atualizar configuração visual com os dados do design
+    if (message.data.visualIndicators) {
+      LinkVisualAnalyzer.updateConfig(message.data.visualIndicators);
+    }
   }
 });
