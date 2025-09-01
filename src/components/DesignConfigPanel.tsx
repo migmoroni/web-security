@@ -13,13 +13,13 @@ const defaultDesignConfig: DesignConfig = {
     enabled: true,
     showSafeLinks: true,
     colors: {
-      safe: '#10b981',
-      suspicious: '#f59e0b',
-      dangerous: '#ef4444'
+      safe: '#dcfce7',      // Verde claro para background
+      suspicious: '#fef3c7', // Amarelo claro para background
+      dangerous: '#fee2e2'   // Vermelho claro para background
     },
-    borderStyle: {
-      width: 2,
-      style: 'solid'
+    style: {
+      backgroundOpacity: 0.3,
+      textContrast: true
     }
   },
   accessibility: {
@@ -32,24 +32,24 @@ const defaultDesignConfig: DesignConfig = {
 
 const colorSchemePresets = {
   default: {
-    safe: '#10b981',
-    suspicious: '#f59e0b',
-    dangerous: '#ef4444'
+    safe: '#dcfce7',      // Verde claro
+    suspicious: '#fef3c7', // Amarelo claro
+    dangerous: '#fee2e2'   // Vermelho claro
   },
   colorblind: {
-    safe: '#2563eb', // azul para seguro
-    suspicious: '#dc2626', // vermelho para suspeito
-    dangerous: '#991b1b' // vermelho escuro para perigoso
+    safe: '#dbeafe',      // Azul claro para seguro
+    suspicious: '#fecaca', // Vermelho claro para suspeito
+    dangerous: '#fee2e2'   // Vermelho mais escuro para perigoso
   },
   highContrast: {
-    safe: '#000000',
-    suspicious: '#666666',
-    dangerous: '#000000'
+    safe: '#f0f0f0',      // Cinza muito claro
+    suspicious: '#d0d0d0', // Cinza médio
+    dangerous: '#c0c0c0'   // Cinza escuro
   },
   subtle: {
-    safe: '#059669',
-    suspicious: '#d97706',
-    dangerous: '#dc2626'
+    safe: '#f0fdf4',      // Verde muito sutil
+    suspicious: '#fffbeb', // Amarelo muito sutil
+    dangerous: '#fef2f2'   // Vermelho muito sutil
   }
 };
 
@@ -198,47 +198,6 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
         </div>
       </div>
 
-      {/* Esquema de Cores */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">🎯 Esquema de Cores</h3>
-        <div className="space-y-3">
-          {(Object.keys(colorSchemePresets) as Array<keyof typeof colorSchemePresets>).map((scheme) => (
-            <label key={scheme} className="flex items-center space-x-3">
-              <input
-                type="radio"
-                name="colorScheme"
-                checked={config.colorScheme === scheme}
-                onChange={() => handleColorSchemeChange(scheme)}
-                className="text-blue-600"
-              />
-              <span className="flex-1">
-                {scheme === 'default' ? 'Padrão' :
-                 scheme === 'colorblind' ? 'Para Daltonismo' :
-                 scheme === 'highContrast' ? 'Alto Contraste' :
-                 scheme === 'subtle' ? 'Sutil' : scheme}
-              </span>
-              <div className="flex space-x-1">
-                <div 
-                  className="w-4 h-4 rounded border"
-                  style={{ backgroundColor: colorSchemePresets[scheme].safe }}
-                  title="Seguro"
-                />
-                <div 
-                  className="w-4 h-4 rounded border"
-                  style={{ backgroundColor: colorSchemePresets[scheme].suspicious }}
-                  title="Suspeito"
-                />
-                <div 
-                  className="w-4 h-4 rounded border"
-                  style={{ backgroundColor: colorSchemePresets[scheme].dangerous }}
-                  title="Perigoso"
-                />
-              </div>
-            </label>
-          ))}
-        </div>
-      </div>
-
       {/* Indicadores Visuais */}
       <div className="bg-gray-50 p-4 rounded-lg">
         <h3 className="text-lg font-semibold mb-3">👁️ Indicadores Visuais</h3>
@@ -265,38 +224,78 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
               <span>Mostrar indicadores em links seguros</span>
             </label>
 
+            {/* Esquema de Cores - movido para cá */}
+            <div className="mt-4 p-3 bg-white rounded border">
+              <h4 className="text-sm font-medium mb-3">Esquemas de Cores</h4>
+              <div className="space-y-2">
+                {(Object.keys(colorSchemePresets) as Array<keyof typeof colorSchemePresets>).map((scheme) => (
+                  <label key={scheme} className="flex items-center space-x-3 text-sm">
+                    <input
+                      type="radio"
+                      name="colorScheme"
+                      checked={config.colorScheme === scheme}
+                      onChange={() => handleColorSchemeChange(scheme)}
+                      className="text-blue-600"
+                    />
+                    <span className="flex-1">
+                      {scheme === 'default' ? 'Padrão' :
+                       scheme === 'colorblind' ? 'Daltonismo' :
+                       scheme === 'highContrast' ? 'Alto Contraste' :
+                       scheme === 'subtle' ? 'Sutil' : scheme}
+                    </span>
+                    <div className="flex space-x-1">
+                      <div 
+                        className="w-3 h-3 rounded border"
+                        style={{ backgroundColor: colorSchemePresets[scheme].safe }}
+                        title="Seguro"
+                      />
+                      <div 
+                        className="w-3 h-3 rounded border"
+                        style={{ backgroundColor: colorSchemePresets[scheme].suspicious }}
+                        title="Suspeito"
+                      />
+                      <div 
+                        className="w-3 h-3 rounded border"
+                        style={{ backgroundColor: colorSchemePresets[scheme].dangerous }}
+                        title="Perigoso"
+                      />
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium mb-2">Largura da Borda</label>
+              <label className="block text-sm font-medium mb-2">Opacidade do Background</label>
               <input
                 type="range"
-                min="1"
-                max="5"
-                value={config.visualIndicators.borderStyle.width}
-                onChange={(e) => handleVisualIndicatorChange('borderStyle', {
-                  ...config.visualIndicators.borderStyle,
-                  width: parseInt(e.target.value)
+                min="0.1"
+                max="0.8"
+                step="0.1"
+                value={config.visualIndicators.style.backgroundOpacity}
+                onChange={(e) => handleVisualIndicatorChange('style', {
+                  ...config.visualIndicators.style,
+                  backgroundOpacity: parseFloat(e.target.value)
                 })}
                 className="w-full"
               />
-              <span className="text-sm text-gray-600">{config.visualIndicators.borderStyle.width}px</span>
+              <span className="text-sm text-gray-600">{Math.round(config.visualIndicators.style.backgroundOpacity * 100)}%</span>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Estilo da Borda</label>
-              <select
-                value={config.visualIndicators.borderStyle.style}
-                onChange={(e) => handleVisualIndicatorChange('borderStyle', {
-                  ...config.visualIndicators.borderStyle,
-                  style: e.target.value as 'solid' | 'dashed' | 'dotted'
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={config.visualIndicators.style.textContrast}
+                onChange={(e) => handleVisualIndicatorChange('style', {
+                  ...config.visualIndicators.style,
+                  textContrast: e.target.checked
                 })}
-                className="w-full p-2 border rounded"
-              >
-                <option value="solid">Sólida</option>
-                <option value="dashed">Tracejada</option>
-                <option value="dotted">Pontilhada</option>
-              </select>
-            </div>
+                className="text-blue-600"
+              />
+              <span>Melhorar contraste do texto</span>
+            </label>
 
+            {/* Cores Personalizadas */}
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-sm font-medium mb-1">Cor Seguro</label>
@@ -342,27 +341,30 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
               <div className="space-y-2">
                 <a 
                   href="#" 
-                  className="block p-2 text-blue-600 hover:underline"
+                  className={`block p-2 text-blue-600 hover:underline ${config.visualIndicators.style.textContrast ? 'font-medium' : ''}`}
                   style={{
-                    borderBottom: `${config.visualIndicators.borderStyle.width}px ${config.visualIndicators.borderStyle.style} ${config.visualIndicators.colors.safe}`
+                    backgroundColor: config.visualIndicators.colors.safe,
+                    opacity: config.visualIndicators.style.backgroundOpacity
                   }}
                 >
                   Link Seguro (exemplo.com)
                 </a>
                 <a 
                   href="#" 
-                  className="block p-2 text-blue-600 hover:underline"
+                  className={`block p-2 text-blue-600 hover:underline ${config.visualIndicators.style.textContrast ? 'font-medium' : ''}`}
                   style={{
-                    borderBottom: `${config.visualIndicators.borderStyle.width}px ${config.visualIndicators.borderStyle.style} ${config.visualIndicators.colors.suspicious}`
+                    backgroundColor: config.visualIndicators.colors.suspicious,
+                    opacity: config.visualIndicators.style.backgroundOpacity
                   }}
                 >
                   Link Suspeito (g00gle.com)
                 </a>
                 <a 
                   href="#" 
-                  className="block p-2 text-blue-600 hover:underline"
+                  className={`block p-2 text-blue-600 hover:underline ${config.visualIndicators.style.textContrast ? 'font-medium' : ''}`}
                   style={{
-                    borderBottom: `${config.visualIndicators.borderStyle.width}px ${config.visualIndicators.borderStyle.style} ${config.visualIndicators.colors.dangerous}`
+                    backgroundColor: config.visualIndicators.colors.dangerous,
+                    opacity: config.visualIndicators.style.backgroundOpacity
                   }}
                 >
                   Link Perigoso (аррle.com)
@@ -416,37 +418,6 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
             />
             <span>Navegação por teclado aprimorada</span>
           </label>
-        </div>
-      </div>
-
-      {/* Presets Rápidos */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">⚡ Presets Rápidos</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => handleColorSchemeChange('default')}
-            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-          >
-            Padrão
-          </button>
-          <button
-            onClick={() => handleColorSchemeChange('colorblind')}
-            className="p-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
-          >
-            Daltonismo
-          </button>
-          <button
-            onClick={() => handleColorSchemeChange('highContrast')}
-            className="p-2 bg-gray-800 text-white rounded hover:bg-gray-900 text-sm"
-          >
-            Alto Contraste
-          </button>
-          <button
-            onClick={() => handleColorSchemeChange('subtle')}
-            className="p-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-          >
-            Sutil
-          </button>
         </div>
       </div>
 

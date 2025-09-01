@@ -28,8 +28,12 @@ export class LinkVisualAnalyzer {
    * Carrega configuração visual
    */
   private static async loadConfig() {
-    const storageConfig = await StorageService.getConfig();
-    this.config = storageConfig.design?.visualIndicators || this.getDefaultConfig();
+    try {
+      const designConfig = await StorageService.getDesignConfig();
+      this.config = designConfig.visualIndicators;
+    } catch (error) {
+      this.config = this.getDefaultConfig();
+    }
   }
 
   /**
@@ -40,13 +44,13 @@ export class LinkVisualAnalyzer {
       enabled: true,
       showSafeLinks: true,
       colors: {
-        safe: '#10b981',      // Verde
-        suspicious: '#f59e0b', // Amarelo/laranja
-        dangerous: '#ef4444'   // Vermelho
+        safe: '#dcfce7',      // Verde claro
+        suspicious: '#fef3c7', // Amarelo claro
+        dangerous: '#fee2e2'   // Vermelho claro
       },
-      borderStyle: {
-        width: 2,
-        style: 'solid'
+      style: {
+        backgroundOpacity: 0.3,
+        textContrast: true
       }
     };
   }
@@ -64,19 +68,19 @@ export class LinkVisualAnalyzer {
    */
   private static setupMutationObserver() {
     this.observer = new MutationObserver((mutations) => {
-      mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as Element;
             
-            // Verificar se o próprio nó é um link
-            if (element.tagName === 'A') {
+            // Processar links adicionados
+            const links = element.querySelectorAll('a[href]') as NodeListOf<HTMLAnchorElement>;
+            links.forEach(link => this.processLink(link));
+            
+            // Se o próprio nó é um link
+            if (element.tagName === 'A' && (element as HTMLAnchorElement).href) {
               this.processLink(element as HTMLAnchorElement);
             }
-            
-            // Verificar links filhos
-            const childLinks = element.querySelectorAll('a[href]') as NodeListOf<HTMLAnchorElement>;
-            childLinks.forEach(link => this.processLink(link));
           }
         });
       });
@@ -92,34 +96,25 @@ export class LinkVisualAnalyzer {
    * Processa um link individual
    */
   private static async processLink(link: HTMLAnchorElement) {
-    if (!this.config?.enabled || this.processedLinks.has(link) || !link.href) {
-      return;
-    }
-
+    if (this.processedLinks.has(link) || !link.href) return;
+    
     this.processedLinks.add(link);
-
+    
     try {
-      // Evitar analisar links internos da mesma página
-      const currentDomain = window.location.hostname;
-      const linkUrl = new URL(link.href);
+      const url = new URL(link.href);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
       
-      if (linkUrl.hostname === currentDomain) return;
-
-      // Analisar o link
       const analysis = await SecurityAnalyzer.analyzeUrl(link.href);
-      
       this.applyVisualIndicator(link, analysis.isSuspicious, analysis.suspicionLevel);
-      
-      // Adicionar tooltip informativo
       this.addTooltip(link, analysis);
       
     } catch (error) {
-      console.error('Erro na análise visual do link:', error);
+      console.warn('Erro ao processar link:', error);
     }
   }
 
   /**
-   * Aplica indicador visual no link
+   * Aplica indicador visual no link usando background
    */
   private static applyVisualIndicator(
     link: HTMLAnchorElement, 
@@ -128,34 +123,69 @@ export class LinkVisualAnalyzer {
   ) {
     if (!this.config) return;
 
-    const { colors, borderStyle } = this.config;
+    const { colors, style } = this.config;
     
     // Determinar cor baseada no nível de suspeita
     let color: string;
+    let securityLevel: string;
+    
     if (!isSuspicious) {
       if (!this.config.showSafeLinks) return;
       color = colors.safe;
+      securityLevel = 'safe';
     } else {
       color = suspicionLevel === 'high' ? colors.dangerous : colors.suspicious;
+      securityLevel = suspicionLevel === 'high' ? 'dangerous' : 'suspicious';
     }
 
-    // Aplicar estilo
-    const borderValue = `${borderStyle.width}px ${borderStyle.style} ${color}`;
-    link.style.borderBottom = borderValue;
-    link.style.transition = 'border-color 0.3s ease';
+    // Salvar background original
+    const originalBackground = link.style.backgroundColor;
+    link.setAttribute('data-original-bg', originalBackground || '');
+    
+    // Aplicar background colorido
+    link.style.backgroundColor = color;
+    link.style.transition = 'background-color 0.3s ease';
+    
+    // Melhorar contraste do texto se configurado
+    if (style.textContrast) {
+      link.style.fontWeight = '500';
+      link.style.textShadow = '1px 1px 1px rgba(0,0,0,0.3)';
+    }
     
     // Adicionar atributo para referência
-    link.setAttribute('data-security-status', isSuspicious ? suspicionLevel : 'safe');
+    link.setAttribute('data-security-level', securityLevel);
     
-    // Efeito hover
-    const originalBorder = borderValue;
+    // Efeito hover - escurecer ligeiramente
+    const originalColor = color;
     link.addEventListener('mouseenter', () => {
-      link.style.borderBottom = `${borderStyle.width + 1}px ${borderStyle.style} ${color}`;
+      const darkerColor = this.darkenColor(originalColor, 0.1);
+      link.style.backgroundColor = darkerColor;
     });
     
     link.addEventListener('mouseleave', () => {
-      link.style.borderBottom = originalBorder;
+      link.style.backgroundColor = originalColor;
     });
+  }
+
+  /**
+   * Escurece uma cor hexadecimal
+   */
+  private static darkenColor(hex: string, amount: number): string {
+    // Remove # se presente
+    hex = hex.replace('#', '');
+    
+    // Converte para RGB
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    // Escurece cada componente
+    const newR = Math.max(0, Math.round(r * (1 - amount)));
+    const newG = Math.max(0, Math.round(g * (1 - amount)));
+    const newB = Math.max(0, Math.round(b * (1 - amount)));
+    
+    // Converte de volta para hex
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
   }
 
   /**
@@ -165,13 +195,11 @@ export class LinkVisualAnalyzer {
     const status = analysis.isSuspicious ? 
       `⚠️ Suspeito (${analysis.suspicionLevel})` : 
       '✅ Seguro';
-      
-    const issueCount = analysis.issues?.length || 0;
-    const tooltip = issueCount > 0 ? 
-      `${status} - ${issueCount} problema(s) detectado(s)` : 
-      status;
     
-    link.title = `🛡️ Web Security: ${tooltip}`;
+    const issues = analysis.issues?.map((issue: any) => issue.description).join(', ') || '';
+    const tooltipText = `${status}${issues ? ` - ${issues}` : ''}`;
+    
+    link.setAttribute('title', tooltipText);
   }
 
   /**
@@ -179,72 +207,72 @@ export class LinkVisualAnalyzer {
    */
   static async updateConfig(newConfig: VisualIndicatorConfig) {
     this.config = newConfig;
-    
-    // Salvar no storage
-    const currentConfig = await StorageService.getConfig();
-    currentConfig.visualIndicators = newConfig;
-    await StorageService.setConfig(currentConfig);
-    
-    // Reaplicar estilos
     this.reapplyStyles();
   }
 
   /**
-   * Reaplica estilos em todos os links
+   * Reaplicar estilos em links existentes
    */
   private static reapplyStyles() {
-    // Limpar estilos existentes
-    const styledLinks = document.querySelectorAll('a[data-security-status]') as NodeListOf<HTMLAnchorElement>;
-    styledLinks.forEach(link => {
-      link.style.borderBottom = '';
-      link.removeAttribute('data-security-status');
-      link.title = '';
+    const links = document.querySelectorAll('a[data-security-level]') as NodeListOf<HTMLAnchorElement>;
+    
+    links.forEach(link => {
+      // Restaurar background original
+      const originalBg = link.getAttribute('data-original-bg') || '';
+      link.style.backgroundColor = originalBg;
+      link.style.fontWeight = '';
+      link.style.textShadow = '';
+      
+      // Remover atributos
+      link.removeAttribute('data-security-level');
+      link.removeAttribute('data-original-bg');
+      
+      // Remarcar para reprocessamento
+      this.processedLinks.delete(link);
     });
-
-    // Limpar conjunto de links processados
-    this.processedLinks = new WeakSet();
     
     // Reprocessar todos os links
     this.analyzeExistingLinks();
   }
 
   /**
-   * Remove indicadores visuais
+   * Desabilita análise visual
    */
   static disable() {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = undefined;
     }
-
-    // Remover estilos de todos os links
-    const styledLinks = document.querySelectorAll('a[data-security-status]') as NodeListOf<HTMLAnchorElement>;
-    styledLinks.forEach(link => {
-      link.style.borderBottom = '';
-      link.removeAttribute('data-security-status');
-      link.title = '';
+    
+    // Remover todos os indicadores visuais
+    const links = document.querySelectorAll('a[data-security-level]') as NodeListOf<HTMLAnchorElement>;
+    links.forEach(link => {
+      const originalBg = link.getAttribute('data-original-bg') || '';
+      link.style.backgroundColor = originalBg;
+      link.style.fontWeight = '';
+      link.style.textShadow = '';
+      link.removeAttribute('data-security-level');
+      link.removeAttribute('data-original-bg');
+      link.removeAttribute('title');
     });
+    
+    this.processedLinks = new WeakSet();
   }
 
   /**
-   * Obtém estatísticas dos links analisados
+   * Obtém estatísticas de links processados
    */
   static getStats() {
-    const links = document.querySelectorAll('a[data-security-status]');
-    const stats = {
+    const links = document.querySelectorAll('a[data-security-level]');
+    const safe = document.querySelectorAll('a[data-security-level="safe"]').length;
+    const suspicious = document.querySelectorAll('a[data-security-level="suspicious"]').length;
+    const dangerous = document.querySelectorAll('a[data-security-level="dangerous"]').length;
+    
+    return {
       total: links.length,
-      safe: 0,
-      suspicious: 0,
-      dangerous: 0
+      safe,
+      suspicious,
+      dangerous
     };
-
-    links.forEach(link => {
-      const status = link.getAttribute('data-security-status');
-      if (status === 'safe') stats.safe++;
-      else if (status === 'low' || status === 'medium') stats.suspicious++;
-      else if (status === 'high') stats.dangerous++;
-    });
-
-    return stats;
   }
 }

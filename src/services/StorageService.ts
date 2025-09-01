@@ -90,13 +90,13 @@ export class StorageService {
           enabled: true,
           showSafeLinks: true,
           colors: {
-            safe: '#10b981',      // Verde
-            suspicious: '#f59e0b', // Amarelo/laranja  
-            dangerous: '#ef4444'   // Vermelho
+            safe: '#dcfce7',      // Verde claro
+            suspicious: '#fef3c7', // Amarelo claro  
+            dangerous: '#fee2e2'   // Vermelho claro
           },
-          borderStyle: {
-            width: 2,
-            style: 'solid'
+          style: {
+            backgroundOpacity: 0.3,
+            textContrast: true
           }
         },
         accessibility: {

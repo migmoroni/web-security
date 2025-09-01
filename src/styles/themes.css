@@ -1,9 +1,9 @@
 /* Variáveis CSS para temas globais */
 :root {
-  /* Cores padrão dos indicadores */
-  --safe-color: #10b981;
-  --suspicious-color: #f59e0b;
-  --dangerous-color: #ef4444;
+  /* Cores padrão dos indicadores - backgrounds claros */
+  --safe-color: #dcfce7;
+  --suspicious-color: #fef3c7;
+  --dangerous-color: #fee2e2;
   
   /* Duração das animações */
   --animation-duration: 0.3s;
@@ -38,17 +38,26 @@ body {
   transition: all var(--animation-duration) ease;
 }
 
-/* Indicadores visuais para links */
+/* Indicadores visuais para links - usando background */
 a[data-security-level="safe"] {
-  border-bottom: 2px solid var(--safe-color) !important;
+  background-color: var(--safe-color) !important;
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)) !important;
 }
 
 a[data-security-level="suspicious"] {
-  border-bottom: 2px solid var(--suspicious-color) !important;
+  background-color: var(--suspicious-color) !important;
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)) !important;
 }
 
 a[data-security-level="dangerous"] {
-  border-bottom: 2px solid var(--dangerous-color) !important;
+  background-color: var(--dangerous-color) !important;
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)) !important;
+}
+
+/* Melhorar contraste do texto quando ativado */
+.text-contrast-enhanced a[data-security-level] {
+  font-weight: 500 !important;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.3) !important;
 }
 
 /* Acessibilidade - motion reduzido */

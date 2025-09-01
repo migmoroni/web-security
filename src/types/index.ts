@@ -76,9 +76,9 @@ export interface VisualIndicatorConfig {
     suspicious: string;
     dangerous: string;
   };
-  borderStyle: {
-    width: number;
-    style: 'solid' | 'dashed' | 'dotted';
+  style: {
+    backgroundOpacity: number;
+    textContrast: boolean;
   };
 }
 
