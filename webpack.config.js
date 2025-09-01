@@ -76,6 +76,11 @@ module.exports = (env, argv) => {
             from: 'public/blocked.html',
             to: 'blocked.html',
           },
+          // Copiar página de demonstração
+          {
+            from: 'public/demo.html',
+            to: 'demo.html',
+          },
           // Copiar o manifest específico do engine como manifest.json
           {
             from: isGecko ? 'public/manifest-gecko.json' : 'public/manifest-blink.json',

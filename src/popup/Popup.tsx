@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ConfigPanel } from '@/components';
+import { VisualConfig } from '@/components/VisualConfig';
 import { StorageService } from '@/services';
 
 const Popup: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'status' | 'config' | 'history'>('status');
+  const [activeTab, setActiveTab] = useState<'status' | 'config' | 'visual' | 'history'>('status');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [analysisCount, setAnalysisCount] = useState<number>(0);
 
@@ -30,6 +31,12 @@ const Popup: React.FC = () => {
     } catch (error) {
       console.error('Erro ao obter histórico:', error);
     }
+  };
+
+  const openDemoPage = () => {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('demo.html')
+    });
   };
 
   const renderTabContent = () => {
@@ -72,15 +79,47 @@ const Popup: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('config')}
-              className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium"
+              className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-2"
             >
               Configurar Proteção
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('visual')}
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium mb-2"
+            >
+              🎨 Configurar Indicadores Visuais
+            </button>
+            
+            <button
+              onClick={openDemoPage}
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+            >
+              🧪 Página de Demonstração
             </button>
           </div>
         );
 
       case 'config':
         return <ConfigPanel />;
+
+      case 'visual':
+        return (
+          <div className="p-4">
+            <div className="flex items-center mb-4">
+              <button
+                onClick={() => setActiveTab('status')}
+                className="text-gray-600 hover:text-gray-900 mr-3"
+              >
+                ← Voltar
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                🎨 Indicadores Visuais
+              </h3>
+            </div>
+            <VisualConfig />
+          </div>
+        );
 
       case 'history':
         return (

@@ -1,4 +1,4 @@
-import { SecurityAnalysisResult } from '@/types';
+import { SecurityAnalysisResult, VisualIndicatorConfig } from '@/types';
 import { SecurityAnalyzer } from '@/analyzers';
 import { NavigationMonitorService } from '@/services/NavigationMonitorService';
 
@@ -40,7 +40,23 @@ interface AllowNavigationMessage {
   };
 }
 
-type Message = SecurityWarningMessage | UserDecisionMessage | NavigationBlockedMessage | AllowNavigationMessage;
+interface UpdateColorPresetMessage {
+  type: 'UPDATE_COLOR_PRESET';
+  data: {
+    colors: VisualIndicatorConfig['colors'];
+    preset: string;
+  };
+}
+
+interface ToggleSafeLinksMessage {
+  type: 'TOGGLE_SAFE_LINKS';
+}
+
+interface ToggleVisualIndicatorsMessage {
+  type: 'TOGGLE_VISUAL_INDICATORS';
+}
+
+type Message = SecurityWarningMessage | UserDecisionMessage | NavigationBlockedMessage | AllowNavigationMessage | UpdateColorPresetMessage | ToggleSafeLinksMessage | ToggleVisualIndicatorsMessage;
 
 // Inicializar serviço de monitoramento de navegação
 NavigationMonitorService.initialize();
@@ -72,7 +88,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
 });
 
 // Escutar mensagens do content script e páginas
-chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
   if (message.type === 'SHOW_SECURITY_WARNING') {
     showSecurityWarning(message.data);
   } else if (message.type === 'USER_DECISION') {
@@ -81,6 +97,12 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) =>
     console.log('📊 Navegação bloqueada registrada:', message.data);
   } else if (message.type === 'ALLOW_NAVIGATION') {
     NavigationMonitorService.allowNavigation(message.data.url, message.data.tabId);
+  } else if (message.type === 'UPDATE_COLOR_PRESET') {
+    await handleColorPresetUpdate(message.data);
+  } else if (message.type === 'TOGGLE_SAFE_LINKS') {
+    await handleToggleSafeLinks();
+  } else if (message.type === 'TOGGLE_VISUAL_INDICATORS') {
+    await handleToggleVisualIndicators();
   }
 });
 
@@ -114,6 +136,78 @@ function handleUserDecision(data: UserDecisionMessage['data']) {
     if (window.id) {
       chrome.windows.remove(window.id);
     }
+  });
+}
+
+// Handlers para configurações visuais
+async function handleColorPresetUpdate(data: { colors: VisualIndicatorConfig['colors']; preset: string }) {
+  try {
+    const { StorageService } = await import('@/services');
+    const config = await StorageService.getConfig();
+    
+    config.visualIndicators.colors = data.colors as VisualIndicatorConfig['colors'];
+    await StorageService.setConfig(config);
+    
+    // Notificar todas as tabs
+    broadcastToContentScripts({
+      type: 'UPDATE_VISUAL_CONFIG',
+      data: config.visualIndicators
+    });
+    
+    console.log(`🎨 Preset de cores "${data.preset}" aplicado`);
+  } catch (error) {
+    console.error('Erro ao atualizar preset de cores:', error);
+  }
+}
+
+async function handleToggleSafeLinks() {
+  try {
+    const { StorageService } = await import('@/services');
+    const config = await StorageService.getConfig();
+    
+    config.visualIndicators.showSafeLinks = !config.visualIndicators.showSafeLinks;
+    await StorageService.setConfig(config);
+    
+    broadcastToContentScripts({
+      type: 'UPDATE_VISUAL_CONFIG',
+      data: config.visualIndicators
+    });
+    
+    console.log(`🔄 Exibição de links seguros: ${config.visualIndicators.showSafeLinks ? 'ON' : 'OFF'}`);
+  } catch (error) {
+    console.error('Erro ao alternar links seguros:', error);
+  }
+}
+
+async function handleToggleVisualIndicators() {
+  try {
+    const { StorageService } = await import('@/services');
+    const config = await StorageService.getConfig();
+    
+    config.visualIndicators.enabled = !config.visualIndicators.enabled;
+    await StorageService.setConfig(config);
+    
+    broadcastToContentScripts({
+      type: 'UPDATE_VISUAL_CONFIG',
+      data: config.visualIndicators
+    });
+    
+    console.log(`👁️ Indicadores visuais: ${config.visualIndicators.enabled ? 'ON' : 'OFF'}`);
+  } catch (error) {
+    console.error('Erro ao alternar indicadores visuais:', error);
+  }
+}
+
+// Função para broadcast de mensagens para content scripts
+function broadcastToContentScripts(message: any) {
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      if (tab.id) {
+        chrome.tabs.sendMessage(tab.id, message).catch(() => {
+          // Ignorar erros para tabs sem content script
+        });
+      }
+    });
   });
 }
 

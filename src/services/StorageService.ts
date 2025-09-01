@@ -39,7 +39,20 @@ export class StorageService {
       enabled: true,
       unicodeAnalysis: true,
       blockSuspiciousLinks: true,
-      showWarnings: true
+      showWarnings: true,
+      visualIndicators: {
+        enabled: true,
+        showSafeLinks: true,
+        colors: {
+          safe: '#10b981',      // Verde
+          suspicious: '#f59e0b', // Amarelo/laranja  
+          dangerous: '#ef4444'   // Vermelho
+        },
+        borderStyle: {
+          width: 2,
+          style: 'solid'
+        }
+      }
     };
   }
 }

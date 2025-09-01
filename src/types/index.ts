@@ -50,6 +50,22 @@ export interface AnalysisConfig {
   unicodeAnalysis: boolean;
   blockSuspiciousLinks: boolean;
   showWarnings: boolean;
+  // Novas configurações visuais
+  visualIndicators: VisualIndicatorConfig;
+}
+
+export interface VisualIndicatorConfig {
+  enabled: boolean;
+  showSafeLinks: boolean;
+  colors: {
+    safe: string;
+    suspicious: string;
+    dangerous: string;
+  };
+  borderStyle: {
+    width: number;
+    style: 'solid' | 'dashed' | 'dotted';
+  };
 }
 
 export interface StorageData {

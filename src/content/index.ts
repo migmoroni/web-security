@@ -1,9 +1,11 @@
 import { SecurityAnalyzer } from '@/analyzers';
 import { StorageService } from '@/services';
 import { NavigationInterceptor } from '@/utils/NavigationInterceptor';
+import { LinkVisualAnalyzer } from '@/services/LinkVisualAnalyzer';
 
-// Inicializar interceptação de navegação para formulários e JS
+// Inicializar serviços
 NavigationInterceptor.initialize();
+LinkVisualAnalyzer.initialize();
 
 // Interceptar cliques em links
 document.addEventListener('click', async (event) => {
@@ -65,44 +67,14 @@ document.addEventListener('click', async (event) => {
   }
 }, true); // useCapture = true para interceptar antes de outros handlers
 
-// Adicionar indicadores visuais para links suspeitos (opcional)
-function addVisualIndicators() {
-  const links = document.querySelectorAll('a[href]');
-  
-  links.forEach(async (link) => {
-    const href = (link as HTMLAnchorElement).href;
-    if (!href) return;
-
-    try {
-      const analysis = await SecurityAnalyzer.analyzeUrl(href);
-      
-      if (analysis.isSuspicious) {
-        const linkElement = link as HTMLAnchorElement;
-        linkElement.setAttribute('data-security-warning', analysis.suspicionLevel);
-        linkElement.style.borderBottom = `2px solid ${
-          analysis.suspicionLevel === 'high' ? '#ef4444' : 
-          analysis.suspicionLevel === 'medium' ? '#f59e0b' : '#10b981'
-        }`;
-      }
-    } catch (error) {
-      // Falha silenciosa para não interferir na experiência do usuário
-    }
-  });
-}
-
-// Executar análise visual quando a página carregar
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', addVisualIndicators);
-} else {
-  addVisualIndicators();
-}
-
-// Re-analisar quando conteúdo dinâmico for adicionado
-const observer = new MutationObserver(() => {
-  addVisualIndicators();
+// Limpar navegações interceptadas quando página for fechada
+window.addEventListener('beforeunload', () => {
+  NavigationInterceptor.cleanup();
 });
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true
+// Escutar mensagens do background/popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'UPDATE_VISUAL_CONFIG') {
+    LinkVisualAnalyzer.updateConfig(message.data);
+  }
 });
