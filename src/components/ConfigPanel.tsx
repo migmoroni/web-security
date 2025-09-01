@@ -19,7 +19,7 @@ const defaultConfig: AnalysisConfig = {
         dangerous: '#fee2e2'
       },
       style: {
-        backgroundOpacity: 0.3,
+        backgroundOpacity: 1.0,
         textContrast: true
       }
     },

@@ -95,7 +95,7 @@ export class StorageService {
             dangerous: '#fee2e2'   // Vermelho claro
           },
           style: {
-            backgroundOpacity: 0.3,
+            backgroundOpacity: 1.0,
             textContrast: true
           }
         },

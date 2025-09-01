@@ -18,7 +18,7 @@ const defaultDesignConfig: DesignConfig = {
       dangerous: '#fee2e2'   // Vermelho claro para background
     },
     style: {
-      backgroundOpacity: 0.3,
+      backgroundOpacity: 1.0,
       textContrast: true
     }
   },
@@ -264,36 +264,6 @@ export const DesignConfigPanel: React.FC<DesignConfigPanelProps> = ({ onConfigCh
                 ))}
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-300">Opacidade do Background</label>
-              <input
-                type="range"
-                min="0.1"
-                max="0.8"
-                step="0.1"
-                value={config.visualIndicators.style.backgroundOpacity}
-                onChange={(e) => handleVisualIndicatorChange('style', {
-                  ...config.visualIndicators.style,
-                  backgroundOpacity: parseFloat(e.target.value)
-                })}
-                className="w-full"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">{Math.round(config.visualIndicators.style.backgroundOpacity * 100)}%</span>
-            </div>
-
-            <label className="flex items-center space-x-2 dark:text-gray-300">
-              <input
-                type="checkbox"
-                checked={config.visualIndicators.style.textContrast}
-                onChange={(e) => handleVisualIndicatorChange('style', {
-                  ...config.visualIndicators.style,
-                  textContrast: e.target.checked
-                })}
-                className="text-blue-600"
-              />
-              <span>Melhorar contraste do texto</span>
-            </label>
 
             {/* Cores Personalizadas */}
             <div className="grid grid-cols-3 gap-3">
