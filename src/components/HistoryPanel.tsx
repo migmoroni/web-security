@@ -54,9 +54,9 @@ export const HistoryPanel: React.FC = () => {
 
     if (filter !== 'all') {
       filtered = entries.filter(entry => {
-        if (filter === 'safe') return !entry.analysis.isSuspicious;
-        if (filter === 'suspicious') return entry.analysis.isSuspicious && entry.analysis.suspicionLevel !== 'high';
-        if (filter === 'dangerous') return entry.analysis.suspicionLevel === 'high';
+        if (filter === 'safe') return entry.analysis.type === 1;
+        if (filter === 'suspicious') return entry.analysis.type === 2;
+        if (filter === 'dangerous') return entry.analysis.type === 3;
         return true;
       });
     }
@@ -66,10 +66,7 @@ export const HistoryPanel: React.FC = () => {
       if (sortBy === 'date') return b.timestamp - a.timestamp;
       if (sortBy === 'domain') return a.domain.localeCompare(b.domain);
       if (sortBy === 'severity') {
-        const severityOrder = { high: 3, medium: 2, low: 1 };
-        const aScore = a.analysis.isSuspicious ? severityOrder[a.analysis.suspicionLevel] : 0;
-        const bScore = b.analysis.isSuspicious ? severityOrder[b.analysis.suspicionLevel] : 0;
-        return bScore - aScore;
+        return b.analysis.type - a.analysis.type;
       }
       return 0;
     });
@@ -95,8 +92,8 @@ export const HistoryPanel: React.FC = () => {
   };
 
   const getStatusIcon = (entry: HistoryEntry) => {
-    if (!entry.analysis.isSuspicious) return '🟢';
-    if (entry.analysis.suspicionLevel === 'high') return '🔴';
+    if (entry.analysis.type === 1) return '🟢';
+    if (entry.analysis.type === 3) return '🔴';
     return '🟡';
   };
 
@@ -143,7 +140,7 @@ export const HistoryPanel: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-green-600">🟢 {stats.safe}</div>
-            <div className="text-gray-600">Seguros</div>
+            <div className="text-gray-600">Não suspeitos</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-red-600">🔴 {stats.dangerous}</div>
@@ -161,7 +158,7 @@ export const HistoryPanel: React.FC = () => {
             className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
             <option value="all">Todos</option>
-            <option value="safe">🟢 Seguros</option>
+            <option value="safe">🟢 Não suspeitos</option>
             <option value="suspicious">🟡 Suspeitos</option>
             <option value="dangerous">🔴 Perigosos</option>
           </select>
@@ -235,10 +232,15 @@ export const HistoryPanel: React.FC = () => {
                     {entry.url}
                   </div>
                   
-                  {entry.analysis.issues.length > 0 && (
+                  {entry.analysis.details.lexical?.explanation && (
                     <div className="text-xs text-gray-600">
-                      {entry.analysis.issues.slice(0, 2).map(issue => issue.description).join(', ')}
-                      {entry.analysis.issues.length > 2 && ` +${entry.analysis.issues.length - 2} mais`}
+                      {entry.analysis.details.lexical.explanation}
+                    </div>
+                  )}
+                  
+                  {entry.analysis.details.reputation?.details && (
+                    <div className="text-xs text-gray-600">
+                      {entry.analysis.details.reputation.details}
                     </div>
                   )}
                 </div>
