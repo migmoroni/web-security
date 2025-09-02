@@ -1,35 +1,27 @@
-export interface SecurityAnalysisResult {
-  isSuspicious: boolean;
-  suspicionLevel: 'low' | 'medium' | 'high';
-  issues: SecurityIssue[];
+// Tipos simplificados para a nova estrutura
+export interface UrlAnalysisResult {
+  type: 1 | 2 | 3; // 1: não suspeito, 2: suspeito, 3: perigoso
   url: string;
   timestamp: number;
+  details: AnalysisDetails;
 }
 
-export interface SecurityIssue {
-  type: string;
-  severity: 'low' | 'medium' | 'high';
-  description: string;
+export interface AnalysisDetails {
+  lexical?: LexicalAnalysisResult;
+  reputation?: ReputationAnalysisResult;
+}
+
+export interface LexicalAnalysisResult {
+  hasMixedScripts: boolean;
+  scripts: string[];
+  suspiciousChars: SuspiciousCharacter[];
+  explanation: string;
+}
+
+export interface ReputationAnalysisResult {
+  isDangerous: boolean;
+  sources: string[];
   details: string;
-}
-
-// Novos tipos para análise aprimorada
-export interface AnalysisResult {
-  safe: boolean;
-  threats: SecurityThreat[];
-  score: number;
-  analysis: {
-    domain: string;
-    checkedAgainst: string[];
-    timestamp: string;
-  };
-}
-
-export interface SecurityThreat {
-  type: string;
-  severity: 'low' | 'medium' | 'high';
-  description: string;
-  details: any;
 }
 
 export interface UnicodeAnalysisResult {
@@ -86,7 +78,7 @@ export interface HistoryEntry {
   id: string;
   url: string;
   domain: string;
-  analysis: SecurityAnalysisResult;
+  analysis: UrlAnalysisResult;
   timestamp: number;
   source: 'click' | 'navigation' | 'form' | 'popup';
   userAction?: 'blocked' | 'proceeded' | 'ignored';
@@ -94,5 +86,5 @@ export interface HistoryEntry {
 
 export interface StorageData {
   config: AnalysisConfig;
-  analysisHistory: SecurityAnalysisResult[];
+  analysisHistory: UrlAnalysisResult[];
 }

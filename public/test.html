@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da Extensão Simplificada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .test-links a {
+            padding: 10px;
+            display: block;
+            text-decoration: none;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        .test-links a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste da Extensão Web Security Analyzer</h1>
+    <p>Esta página contém diferentes tipos de links para testar a nova estrutura simplificada da extensão.</p>
+
+    <div class="test-section">
+        <h2>🟢 Links Tipo 1 - Não Suspeitos</h2>
+        <p>Estes links devem aparecer com indicador verde (não suspeito):</p>
+        <div class="test-links">
+            <a href="https://google.com">Google - Site confiável</a>
+            <a href="https://github.com">GitHub - Repositórios de código</a>
+            <a href="https://stackoverflow.com">Stack Overflow - Comunidade de desenvolvedores</a>
+            <a href="https://mozilla.org">Mozilla - Organização sem fins lucrativos</a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🟡 Links Tipo 2 - Suspeitos (Análise Léxica)</h2>
+        <p>Estes links devem aparecer com indicador amarelo (suspeito) devido a caracteres Unicode mistos:</p>
+        <div class="test-links">
+            <a href="https://gооgle.com">Google com 'o' cirílico - Spoofing</a>
+            <a href="https://gitһub.com">GitHub com 'h' cirílico - Spoofing</a>
+            <a href="https://аpple.com">Apple com 'a' cirílico - Spoofing</a>
+            <a href="https://microsоft.com">Microsoft com 'o' cirílico - Spoofing</a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔴 Links Tipo 3 - Perigosos (Reputação)</h2>
+        <p>Estes links podem ser detectados como perigosos pelas bases de dados de ameaças:</p>
+        <div class="test-links">
+            <a href="http://malware.testing.google.test/testing/malware/">Link de teste de malware do Google</a>
+            <a href="https://testsafebrowsing.appspot.com/s/malware.html">Teste Safe Browsing - Malware</a>
+            <a href="https://testsafebrowsing.appspot.com/s/phishing.html">Teste Safe Browsing - Phishing</a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Como Testar</h2>
+        <ol>
+            <li><strong>Varredura Visual</strong>: Observe os indicadores visuais nos links (verde, amarelo)</li>
+            <li><strong>Análise Léxica</strong>: Links tipo 2 devem mostrar ⚠️ e ter fundo amarelado</li>
+            <li><strong>Interceptação</strong>: Clique nos links para ver a interceptação em ação</li>
+            <li><strong>Alertas</strong>: Links tipo 2/3 devem mostrar modal de alerta antes de navegar</li>
+            <li><strong>Navegação</strong>: Links tipo 1 devem navegar normalmente</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Estados dos Serviços</h2>
+        <p>Abra o console do navegador (F12) para ver logs dos serviços:</p>
+        <ul>
+            <li>🚀 Inicializando Web Security Analyzer...</li>
+            <li>🔍 Inicializando LinkScannerService...</li>
+            <li>🎯 Inicializando ClickInterceptorService...</li>
+            <li>✅ AlertService inicializado</li>
+        </ul>
+    </div>
+
+    <script>
+        // Script simples para adicionar links dinamicamente (teste do mutation observer)
+        setTimeout(() => {
+            const newSection = document.createElement('div');
+            newSection.className = 'test-section';
+            newSection.innerHTML = `
+                <h2>🆕 Links Adicionados Dinamicamente</h2>
+                <p>Estes links foram adicionados após 3 segundos para testar o MutationObserver:</p>
+                <div class="test-links">
+                    <a href="https://example.com">Exemplo.com - Deve ser tipo 1</a>
+                    <a href="https://gоо𝗀𝗅е.com">Google com múltiplos scripts - Deve ser tipo 2</a>
+                </div>
+            `;
+            document.body.appendChild(newSection);
+            
+            console.log('📝 Links dinâmicos adicionados - testando MutationObserver');
+        }, 3000);
+    </script>
+</body>
+</html>
