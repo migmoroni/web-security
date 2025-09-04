@@ -12,7 +12,7 @@
     "build": "npm run build:blink && npm run build:gecko",
     "prebuild:blink": "rm -rf dist/build/blink",
     "build:blink": "webpack --mode=production --env engine=blink",
-    "prebuild:gecko": "rm -rf dist/build/gecko", 
+    "prebuild:gecko": "rm -rf dist/build/gecko",
     "build:gecko": "webpack --mode=production --env engine=gecko",
     "package": "scripts/package-extension.sh",
     "package:blink": "scripts/package-extension.sh blink",

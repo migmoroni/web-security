@@ -1,4 +1,5 @@
 import { LexicalAnalysisResult, SuspiciousCharacter } from '@/types';
+import { PunycodeConverter } from '@/utils/PunycodeConverter';
 
 /**
  * Analisador Léxico de URLs
@@ -24,17 +25,40 @@ export class LexicalAnalyzer {
   static analyzeUrl(url: string): LexicalAnalysisResult {
     // Extrair apenas o domínio para análise
     let domain: string;
+    let originalDomain: string;
+    
     try {
       const urlObj = new URL(url);
+      originalDomain = urlObj.hostname;
       domain = urlObj.hostname;
     } catch {
+      originalDomain = url;
       domain = url; // Se não for URL válida, analisa o texto completo
+    }
+
+    // Detectar se é punycode e converter para Unicode
+    let isPunycode = false;
+    let isValidPunycode = true;
+    
+    try {
+      if (domain.includes('xn--')) {
+        isPunycode = true;
+        isValidPunycode = this.isPunycodeValid(domain);
+        if (isValidPunycode) {
+          domain = PunycodeConverter.toUnicode(domain);
+        }
+      }
+    } catch (error) {
+      // Se falhar na conversão, manter o domínio original
+      console.warn('Erro ao converter punycode:', error);
+      domain = originalDomain;
+      isValidPunycode = false;
     }
 
     const scripts = new Set<string>();
     const suspiciousChars: SuspiciousCharacter[] = [];
 
-    // Analisar cada caractere do domínio
+    // Analisar cada caractere do domínio decodificado
     for (let i = 0; i < domain.length; i++) {
       const char = domain[i];
       
@@ -47,8 +71,8 @@ export class LexicalAnalyzer {
         scripts.add(script);
       }
 
-      // Detectar caracteres potencialmente confusos
-      if (this.isSuspiciousCharacter(char)) {
+      // Detectar caracteres potencialmente confusos apenas se não for Latino
+      if (this.isSuspiciousCharacter(char) && script !== 'Latino') {
         suspiciousChars.push({
           char,
           script: script || 'Desconhecido',
@@ -61,16 +85,30 @@ export class LexicalAnalyzer {
     const scriptsArray = Array.from(scripts);
     const hasMixedScripts = scriptsArray.length > 1;
 
-    // Gerar explicação
+    // Gerar explicação mais precisa
     let explanation = '';
+    
+    if (isPunycode && !isValidPunycode) {
+      explanation = `ALERTA: Punycode inválido detectado em ${originalDomain}. `;
+      explanation += 'Isso pode indicar tentativa de phishing ou erro de codificação.';
+    } else if (isPunycode) {
+      explanation = `Domínio internacional (IDN): ${originalDomain} → ${domain}. `;
+    }
+
     if (hasMixedScripts) {
-      explanation = `Mistura de scripts detectada: ${scriptsArray.join(', ')}. `;
-      explanation += 'URLs legítimas geralmente usam apenas um conjunto de caracteres.';
+      explanation += `Mistura de scripts detectada: ${scriptsArray.join(', ')}. `;
+      explanation += 'URLs legítimas raramente misturam diferentes sistemas de escrita.';
     } else if (suspiciousChars.length > 0) {
-      explanation = `Caracteres potencialmente confusos detectados: ${suspiciousChars.map(c => c.char).join(', ')}. `;
-      explanation += 'Estes caracteres podem ser usados para imitar outros domínios.';
+      explanation += `Caracteres potencialmente confusos detectados: ${suspiciousChars.map(c => c.char).join(', ')}. `;
+      explanation += 'Estes caracteres podem ser usados para imitar domínios latinos.';
     } else {
-      explanation = `URL usa apenas caracteres ${scriptsArray.length > 0 ? scriptsArray[0] : 'padrão'}. Nenhuma anomalia léxica detectada.`;
+      const mainScript = scriptsArray.length > 0 ? scriptsArray[0] : 'Latino';
+      explanation += `Domínio usa apenas caracteres ${mainScript}. `;
+      if (isPunycode && isValidPunycode) {
+        explanation += 'IDN legítimo detectado.';
+      } else {
+        explanation += 'Nenhuma anomalia léxica detectada.';
+      }
     }
 
     return {
@@ -94,24 +132,62 @@ export class LexicalAnalyzer {
   }
 
   /**
+   * Verifica se um domínio contém apenas punycode válido
+   */
+  private static isPunycodeValid(domain: string): boolean {
+    try {
+      // Se contém xn-- mas a conversão falha, é inválido
+      if (domain.includes('xn--')) {
+        const decoded = PunycodeConverter.toUnicode(domain);
+        const encoded = PunycodeConverter.toASCII(decoded);
+        return encoded.toLowerCase() === domain.toLowerCase();
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Verifica se um caractere é potencialmente suspeito
+   * Foca em caracteres que podem ser confundidos com latinos
    */
   private static isSuspiciousCharacter(char: string): boolean {
     const code = char.charCodeAt(0);
     
-    // Caracteres que podem ser confundidos com latinos
-    const confusingChars = [
-      0x0430, // а (cirílico a)
-      0x043E, // о (cirílico o)
-      0x0440, // р (cirílico p)
-      0x0435, // е (cirílico e)
-      0x0445, // х (cirílico x)
-      0x0441, // с (cirílico c)
-      0x03B1, // α (grego alpha)
-      0x03BF, // ο (grego omicron)
-      0x03C1, // ρ (grego rho)
-    ];
+    // Mapeamento de caracteres confusos com seus equivalentes latinos
+    const confusingChars = new Map([
+      // Cirílico que se parece com latino
+      [0x0430, 'a'], // а → a
+      [0x043E, 'o'], // о → o
+      [0x0440, 'p'], // р → p
+      [0x0435, 'e'], // е → e
+      [0x0445, 'x'], // х → x
+      [0x0441, 'c'], // с → c
+      [0x0442, 't'], // т → t
+      [0x043A, 'k'], // к → k
+      [0x043C, 'm'], // м → m
+      [0x043D, 'n'], // н → n
+      [0x0443, 'y'], // у → y
+      [0x0432, 'v'], // в → v
+      [0x0437, '3'], // з → 3
+      
+      // Grego que se parece com latino
+      [0x03B1, 'a'], // α → a
+      [0x03BF, 'o'], // ο → o
+      [0x03C1, 'p'], // ρ → p
+      [0x03B5, 'e'], // ε → e
+      [0x03C5, 'u'], // υ → u
+      [0x03B9, 'i'], // ι → i
+      [0x03BA, 'k'], // κ → k
+      [0x03BD, 'v'], // ν → v
+      [0x03C7, 'x'], // χ → x
+      
+      // Outros caracteres potencialmente confusos
+      [0x04BB, 'h'], // һ → h (cirílico h)
+      [0x0501, 'd'], // ԁ → d (cirílico d)
+    ]);
 
-    return confusingChars.includes(code);
+    return confusingChars.has(code);
   }
 }

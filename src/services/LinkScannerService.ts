@@ -2,6 +2,7 @@ import { LexicalAnalyzer } from '@/analyzers/LexicalAnalyzer';
 import { UrlAnalysisResult } from '@/types';
 import { StorageService } from '@/services/StorageService';
 
+
 /**
  * PARTE 2.1: SERVIÇO DE VARREDURA DE LINKS
  * Programa que varre páginas à procura de links e hiperlinks (http ou https)
@@ -21,6 +22,7 @@ export class LinkScannerService {
     
     // Verificar se serviço está habilitado
     const config = await StorageService.getConfig();
+    console.log('📋 Configuração carregada:', config);
     this.isEnabled = config.enabled;
     
     if (!this.isEnabled) {
@@ -28,13 +30,15 @@ export class LinkScannerService {
       return;
     }
 
-    // Analisar links existentes na página
+    console.log('✅ LinkScannerService habilitado, iniciando varredura...');
+    
+    // Varrer links existentes
     this.scanExistingLinks();
     
-    // Configurar observer para novos links
+    // Observar novos links
     this.setupMutationObserver();
     
-    console.log('✅ LinkScannerService operacional');
+    console.log('🔍 LinkScannerService iniciado com sucesso');
   }
 
   /**
@@ -42,8 +46,10 @@ export class LinkScannerService {
    */
   private static scanExistingLinks() {
     const links = document.querySelectorAll('a[href]') as NodeListOf<HTMLAnchorElement>;
+    console.log(`🔍 Encontrados ${links.length} links na página`);
     
-    links.forEach(link => {
+    links.forEach((link, index) => {
+      console.log(`📎 Link ${index + 1}: ${link.href}`);
       this.processLink(link);
     });
     
@@ -83,6 +89,7 @@ export class LinkScannerService {
    * Processa um link individual
    */
   private static async processLink(link: HTMLAnchorElement) {
+    
     // Evitar processar o mesmo link múltiplas vezes
     if (this.processedLinks.has(link)) return;
     this.processedLinks.add(link);
@@ -90,15 +97,20 @@ export class LinkScannerService {
     // Verificar se é URL externa (http/https)
     if (!this.isExternalUrl(link.href)) return;
 
+    console.log(`🔗 Processando link: ${link.href}`);
+
     try {
       // Fazer apenas análise léxica (rápida)
       const lexicalResult = LexicalAnalyzer.analyzeUrl(link.href);
+      console.log(`📊 Resultado da análise:`, lexicalResult);
       
       // Determinar tipo baseado na análise léxica
       const analysisType: 1 | 2 = (lexicalResult.hasMixedScripts || lexicalResult.suspiciousChars.length > 0) ? 2 : 1;
+      console.log(`🎯 Tipo determinado: ${analysisType}`);
       
       // Aplicar indicador visual
       this.applyVisualIndicator(link, analysisType);
+      console.log(`🎨 Indicador visual aplicado para tipo ${analysisType}`);
       
       // Log apenas para links suspeitos
       if (analysisType === 2) {
@@ -116,9 +128,12 @@ export class LinkScannerService {
   private static isExternalUrl(url: string): boolean {
     try {
       const urlObj = new URL(url);
-      return (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') && 
+      const isExternal = (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') && 
              urlObj.hostname !== window.location.hostname;
-    } catch {
+      console.log(`🌐 URL ${url} é externa? ${isExternal} (protocolo: ${urlObj.protocol}, hostname: ${urlObj.hostname} vs ${window.location.hostname})`);
+      return isExternal;
+    } catch (error) {
+      console.log(`❌ Erro ao verificar URL ${url}:`, error);
       return false;
     }
   }

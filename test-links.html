@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Links para Web Security Extension</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            line-height: 1.6; 
+        }
+        .test-section { 
+            margin: 30px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+        }
+        h2 { 
+            color: #333; 
+            margin-bottom: 15px; 
+        }
+        a { 
+            display: block; 
+            margin: 10px 0; 
+            padding: 8px; 
+            text-decoration: none; 
+            color: #007bff; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 4px; 
+        }
+        a:hover { 
+            background-color: #f8f9fa; 
+        }
+        .description {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste de Análise de Links - Web Security Extension v3</h1>
+    <p>Esta página contém links de teste para verificar se a extensão está funcionando corretamente.</p>
+    <p><strong>Versão Completa:</strong> Com implementação nativa de punycode para detecção completa de ataques.</p>
+
+    <div class="test-section">
+        <h2>🟢 Links Normais (Esperado: Verde - Tipo 1)</h2>
+        <a href="https://google.com">Google.com</a>
+        <div class="description">Link normal usando apenas caracteres latinos</div>
+        
+        <a href="https://github.com">GitHub.com</a>
+        <div class="description">Outro link normal</div>
+        
+        <a href="https://stackoverflow.com">StackOverflow.com</a>
+        <div class="description">Link comum de programação</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🟡 Links Suspeitos com Punycode (Esperado: Amarelo - Tipo 2)</h2>
+        <a href="https://xn--ggl-tdd6ba.com">xn--ggl-tdd6ba.com</a>
+        <div class="description">Punycode que decodifica para "gооglе.com" (mistura Latino/Cirílico)</div>
+        
+        <a href="https://xn--80ak6aa92e.com">xn--80ak6aa92e.com</a>
+        <div class="description">Punycode para "аррӏе.com" (imitação de Apple)</div>
+        
+        <a href="https://gооglе.com">gооglе.com</a>
+        <div class="description">Imitação direta usando caracteres cirílicos (о е)</div>
+        
+        <a href="https://gοοgle.com">gοοgle.com</a>
+        <div class="description">Imitação usando caracteres gregos (ο ao invés de o)</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🌍 Links IDN Legítimos (Esperado: Verde - Tipo 1)</h2>
+        <a href="https://xn--n3h.com">xn--n3h.com</a>
+        <div class="description">☃.com - emoji legítimo (apenas 1 script)</div>
+        
+        <a href="https://xn--fsq.xn--0zwm56d">xn--fsq.xn--0zwm56d</a>
+        <div class="description">例.测试 - domínio chinês legítimo (apenas 1 script)</div>
+        
+        <a href="https://例子.com">例子.com</a>
+        <div class="description">Apenas caracteres chineses (direto, sem punycode)</div>
+        
+        <a href="https://тест.com">тест.com</a>
+        <div class="description">Apenas caracteres cirílicos (direto)</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Links Internos (Esperado: Não processados)</h2>
+        <a href="/internal-link">Link interno</a>
+        <div class="description">Links internos não devem ser processados</div>
+        
+        <a href="#section">Link para âncora</a>
+        <div class="description">Links para âncoras não devem ser processados</div>
+    </div>
+
+    <script>
+        // Aguardar a extensão carregar e processar os links
+        setTimeout(() => {
+            console.log('🧪 Verificando se links foram processados pela extensão...');
+            
+            const links = document.querySelectorAll('a[href^="http"]');
+            let processedCount = 0;
+            let type1Count = 0;
+            let type2Count = 0;
+            
+            links.forEach(link => {
+                if (link.classList.contains('security-link-type-1') || 
+                    link.classList.contains('security-link-type-2')) {
+                    processedCount++;
+                    if (link.classList.contains('security-link-type-1')) type1Count++;
+                    if (link.classList.contains('security-link-type-2')) type2Count++;
+                }
+            });
+            
+            console.log(`📊 Resultado do teste:`);
+            console.log(`- Total de links externos: ${links.length}`);
+            console.log(`- Links processados: ${processedCount}`);
+            console.log(`- Tipo 1 (seguros): ${type1Count}`);
+            console.log(`- Tipo 2 (suspeitos): ${type2Count}`);
+            
+            if (processedCount === 0) {
+                console.warn('⚠️ Nenhum link foi processado pela extensão!');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
