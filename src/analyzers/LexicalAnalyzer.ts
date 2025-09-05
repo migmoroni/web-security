@@ -36,16 +36,18 @@ export class LexicalAnalyzer {
       domain = url; // Se não for URL válida, analisa o texto completo
     }
 
-    // Detectar se é punycode e converter para Unicode
+    // Detectar se é punycode e converter para Unicode (otimizado)
+    // Faz validação e decodificação em uma única operação para evitar dupla conversão
     let isPunycode = false;
     let isValidPunycode = true;
     
     try {
       if (domain.includes('xn--')) {
         isPunycode = true;
-        isValidPunycode = this.isPunycodeValid(domain);
+        const punycodeResult = this.isPunycodeValid(domain);
+        isValidPunycode = punycodeResult.isValid;
         if (isValidPunycode) {
-          domain = PunycodeConverter.toUnicode(domain);
+          domain = punycodeResult.decoded;
         }
       }
     } catch (error) {
@@ -133,18 +135,20 @@ export class LexicalAnalyzer {
 
   /**
    * Verifica se um domínio contém apenas punycode válido
+   * Retorna objeto com validação e domínio decodificado para otimização
    */
-  private static isPunycodeValid(domain: string): boolean {
+  private static isPunycodeValid(domain: string): { isValid: boolean; decoded: string } {
     try {
       // Se contém xn-- mas a conversão falha, é inválido
       if (domain.includes('xn--')) {
         const decoded = PunycodeConverter.toUnicode(domain);
         const encoded = PunycodeConverter.toASCII(decoded);
-        return encoded.toLowerCase() === domain.toLowerCase();
+        const isValid = encoded.toLowerCase() === domain.toLowerCase();
+        return { isValid, decoded };
       }
-      return true;
+      return { isValid: true, decoded: domain };
     } catch {
-      return false;
+      return { isValid: false, decoded: domain };
     }
   }
 
