@@ -59,9 +59,9 @@ export class StorageService {
     
     return {
       total: history.length,
-      safe: history.filter(h => !h.analysis.isSuspicious).length,
-      suspicious: history.filter(h => h.analysis.isSuspicious && h.analysis.suspicionLevel !== 'high').length,
-      dangerous: history.filter(h => h.analysis.suspicionLevel === 'high').length,
+      safe: history.filter(h => h.analysis.type === 1).length,
+      suspicious: history.filter(h => h.analysis.type === 2).length,
+      dangerous: history.filter(h => h.analysis.type === 3).length,
       lastWeek: history.filter(h => h.timestamp > oneWeekAgo).length
     };
   }
@@ -83,6 +83,89 @@ export class StorageService {
       unicodeAnalysis: true,
       blockSuspiciousLinks: true,
       showWarnings: true,
+      linkTypes: {
+        text: {
+          enabled: true,
+          showBackground: true,
+          showBorder: true,
+          showIcon: false,
+          borderStyle: 'solid',
+          borderWidth: '3px',
+          opacity: 0.1
+        },
+        image: {
+          enabled: true,
+          showBackground: false,
+          showBorder: true,
+          showIcon: false,
+          borderStyle: 'solid',
+          borderWidth: '3px',
+          opacity: 0.1
+        },
+        video: {
+          enabled: true,
+          showBackground: false,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'dashed',
+          borderWidth: '2px',
+          opacity: 0.1
+        },
+        audio: {
+          enabled: true,
+          showBackground: false,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'dotted',
+          borderWidth: '2px',
+          opacity: 0.1
+        },
+        document: {
+          enabled: true,
+          showBackground: true,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'solid',
+          borderWidth: '2px',
+          opacity: 0.15
+        },
+        archive: {
+          enabled: true,
+          showBackground: true,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'double',
+          borderWidth: '3px',
+          opacity: 0.2
+        },
+        code: {
+          enabled: true,
+          showBackground: true,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+          opacity: 0.1
+        },
+        service: {
+          enabled: true,
+          showBackground: false,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'solid',
+          borderWidth: '2px',
+          opacity: 0.1
+        },
+        download: {
+          enabled: true,
+          showBackground: true,
+          showBorder: true,
+          showIcon: true,
+          borderStyle: 'solid',
+          borderWidth: '4px',
+          opacity: 0.25
+        }
+      },
       design: {
         theme: 'light',
         colorScheme: 'default',

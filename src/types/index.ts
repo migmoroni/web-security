@@ -44,6 +44,8 @@ export interface AnalysisConfig {
   showWarnings: boolean;
   // Configurações visuais movidas para design
   design: DesignConfig;
+  // Configurações específicas por tipo de link
+  linkTypes: LinkTypeConfig;
 }
 
 export interface DesignConfig {
@@ -71,6 +73,33 @@ export interface VisualIndicatorConfig {
   style: {
     backgroundOpacity: number;
     textContrast: boolean;
+  };
+}
+
+export interface LinkTypeConfig {
+  text: LinkStyleConfig;
+  image: LinkStyleConfig;
+  video: LinkStyleConfig;
+  audio: LinkStyleConfig;
+  document: LinkStyleConfig;
+  archive: LinkStyleConfig;
+  code: LinkStyleConfig;
+  service: LinkStyleConfig; // YouTube, SoundCloud, etc.
+  download: LinkStyleConfig;
+}
+
+export interface LinkStyleConfig {
+  enabled: boolean;
+  showBackground: boolean;
+  showBorder: boolean;
+  showIcon: boolean;
+  borderStyle: 'solid' | 'dashed' | 'dotted' | 'double';
+  borderWidth: '1px' | '2px' | '3px' | '4px';
+  opacity: number;
+  customColors?: {
+    safe?: string;
+    suspicious?: string;
+    dangerous?: string;
   };
 }
 
