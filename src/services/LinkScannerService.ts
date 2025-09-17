@@ -108,8 +108,8 @@ export class LinkScannerService {
     if (this.processedLinks.has(link)) return;
     this.processedLinks.add(link);
 
-    // Verificar se é URL externa (http/https)
-    if (!this.isExternalUrl(link.href)) return;
+    // Verificar se é URL processável (http/https)
+    if (!this.isProcessableUrl(link.href)) return;
 
     console.log(`🔗 Processando link: ${link.href}`);
 
@@ -137,15 +137,14 @@ export class LinkScannerService {
   }
 
   /**
-   * Verifica se URL é externa (http/https)
+   * Verifica se URL é processável (http/https)
    */
-  private static isExternalUrl(url: string): boolean {
+  private static isProcessableUrl(url: string): boolean {
     try {
       const urlObj = new URL(url);
-      const isExternal = (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') && 
-             urlObj.hostname !== window.location.hostname;
-      console.log(`🌐 URL ${url} é externa? ${isExternal} (protocolo: ${urlObj.protocol}, hostname: ${urlObj.hostname} vs ${window.location.hostname})`);
-      return isExternal;
+      const isProcessable = urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+      console.log(`🌐 URL ${url} é processável? ${isProcessable} (protocolo: ${urlObj.protocol})`);
+      return isProcessable;
     } catch (error) {
       console.log(`❌ Erro ao verificar URL ${url}:`, error);
       return false;
@@ -364,10 +363,12 @@ export class LinkScannerService {
     
     const color = type === 1 ? colors.safe : colors.suspicious;
     
-    // Aplicar estilos baseados na configuração
+    // Aplicar estilos baseados na configuração sem afetar o layout
     const styles: any = {
-      borderRadius: '2px',
-      transition: 'all 0.2s ease'
+      borderRadius: '3px',
+      transition: 'all 0.2s ease-in-out',
+      position: 'relative',
+      display: 'inline-block'
     };
     
     // Background (se habilitado)
@@ -376,25 +377,133 @@ export class LinkScannerService {
       const rgb = this.hexToRgb(color);
       if (rgb) {
         styles.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+        styles.padding = '1px 3px';
       }
-    } else {
-      styles.backgroundColor = 'transparent';
     }
     
-    // Border (se habilitado)  
+    // Border usando box-shadow para não afetar o layout
     if (linkConfig.showBorder) {
-      const borderWidth = linkConfig.borderWidth || '3px';
+      const borderWidth = parseInt(linkConfig.borderWidth?.replace('px', '') || '3');
       const borderStyle = linkConfig.borderStyle || 'solid';
-      styles.borderLeft = `${borderWidth} ${borderStyle} ${color}`;
-      styles.paddingLeft = '4px';
+      
+      // Criar box-shadow baseado no estilo da borda
+      let boxShadow = '';
+      
+      switch (borderStyle) {
+        case 'solid':
+          boxShadow = `inset ${borderWidth}px 0 0 ${color}`;
+          break;
+        case 'dashed':
+          // Simular borda tracejada com múltiplas sombras
+          const dashSize = Math.max(1, Math.floor(borderWidth / 2));
+          boxShadow = `inset ${borderWidth}px 0 0 ${color}`;
+          styles.borderLeft = `${borderWidth}px dashed ${color}`;
+          styles.borderLeftColor = 'transparent';
+          styles.backgroundImage = `linear-gradient(to bottom, ${color} 50%, transparent 50%)`;
+          styles.backgroundSize = `${borderWidth}px ${dashSize * 2}px`;
+          styles.backgroundRepeat = 'repeat-y';
+          styles.backgroundPosition = 'left';
+          break;
+        case 'dotted':
+          // Simular borda pontilhada
+          boxShadow = `inset ${borderWidth}px 0 0 ${color}`;
+          styles.borderLeft = `${borderWidth}px dotted ${color}`;
+          break;
+        case 'double':
+          // Borda dupla usando box-shadow
+          const innerWidth = Math.max(1, Math.floor(borderWidth / 3));
+          const outerWidth = borderWidth - innerWidth - 1;
+          boxShadow = `inset ${innerWidth}px 0 0 ${color}, inset ${borderWidth}px 0 0 ${color}`;
+          break;
+        default:
+          boxShadow = `inset ${borderWidth}px 0 0 ${color}`;
+      }
+      
+      if (borderStyle !== 'dashed') {
+        styles.boxShadow = boxShadow;
+      }
+      
+      // Adicionar padding apenas se não houver background
+      if (!linkConfig.showBackground) {
+        styles.paddingLeft = `${Math.max(2, borderWidth)}px`;
+      }
     }
     
-    // Icon (se habilitado - implementação futura)
+    // Melhorar contraste de texto se necessário
+    if (linkConfig.showBackground && type === 2) {
+      const rgb = this.hexToRgb(color);
+      if (rgb) {
+        const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+        if (brightness < 128) {
+          styles.color = '#ffffff';
+        }
+      }
+    }
+    
+    // Adicionar hover effect
+    link.addEventListener('mouseenter', () => {
+      if (linkConfig.showBackground) {
+        const rgb = this.hexToRgb(color);
+        if (rgb) {
+          const hoverOpacity = Math.min(1, (linkConfig.opacity || 0.1) * 2);
+          link.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${hoverOpacity})`;
+        }
+      }
+    }, { once: false });
+    
+    link.addEventListener('mouseleave', () => {
+      if (linkConfig.showBackground) {
+        const rgb = this.hexToRgb(color);
+        if (rgb) {
+          const normalOpacity = linkConfig.opacity || 0.1;
+          link.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${normalOpacity})`;
+        }
+      }
+    }, { once: false });
+    
+    // Icon (se habilitado)
     if (linkConfig.showIcon) {
-      // TODO: Implementar ícones para diferentes tipos de links
+      this.addLinkIcon(link, linkType, color);
     }
     
     Object.assign(link.style, styles);
+  }
+  
+  /**
+   * Adiciona ícone ao link baseado no tipo
+   */
+  private static addLinkIcon(link: HTMLAnchorElement, linkType: keyof LinkTypeConfig, color: string) {
+    // Remover ícone anterior se existir
+    const existingIcon = link.querySelector('.security-link-icon');
+    if (existingIcon) {
+      existingIcon.remove();
+    }
+    
+    const iconMap = {
+      text: '🔗',
+      image: '🖼️',
+      video: '🎥',
+      audio: '🎵',
+      document: '📄',
+      archive: '📦',
+      code: '💻',
+      service: '🌐',
+      download: '⬇️'
+    };
+    
+    const icon = iconMap[linkType] || '🔗';
+    
+    const iconElement = document.createElement('span');
+    iconElement.className = 'security-link-icon';
+    iconElement.textContent = icon;
+    iconElement.style.cssText = `
+      font-size: 0.8em;
+      margin-right: 2px;
+      opacity: 0.7;
+      display: inline-block;
+    `;
+    
+    link.insertBefore(iconElement, link.firstChild);
   }
   
   /**
