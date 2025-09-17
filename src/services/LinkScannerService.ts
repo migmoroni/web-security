@@ -42,39 +42,21 @@ export class LinkScannerService {
   }
 
   /**
-   * Varre links existentes na página
+   * Varre links existentes na página, incluindo Shadow DOM.
    */
   private static scanExistingLinks() {
-    const links = document.querySelectorAll('a[href]') as NodeListOf<HTMLAnchorElement>;
-    console.log(`🔍 Encontrados ${links.length} links na página`);
-    
-    links.forEach((link, index) => {
-      console.log(`📎 Link ${index + 1}: ${link.href}`);
-      this.processLink(link);
-    });
-    
-    console.log(`📊 ${links.length} links processados na página inicial`);
+    console.log('🔍 Varrendo links existentes na página...');
+    this.scanNodeAndShadows(document.body);
   }
 
   /**
-   * Configura observer para detectar novos links
+   * Configura observer para detectar novos links, incluindo em Shadow DOM.
    */
   private static setupMutationObserver() {
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as Element;
-            
-            // Verificar se o próprio elemento é um link
-            if (element.tagName === 'A' && element.hasAttribute('href')) {
-              this.processLink(element as HTMLAnchorElement);
-            }
-            
-            // Verificar links dentro do elemento adicionado
-            const links = element.querySelectorAll('a[href]') as NodeListOf<HTMLAnchorElement>;
-            links.forEach(link => this.processLink(link));
-          }
+          this.scanNodeAndShadows(node);
         });
       });
     });
@@ -83,6 +65,38 @@ export class LinkScannerService {
       childList: true,
       subtree: true
     });
+  }
+
+  /**
+   * Varre um nó e seus descendentes, incluindo Shadow DOM, em busca de links.
+   */
+  private static scanNodeAndShadows(node: Node) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as Element;
+
+      // 1. Processa o próprio elemento se for um link
+      if (element.tagName === 'A' && element.hasAttribute('href')) {
+        this.processLink(element as HTMLAnchorElement);
+      }
+
+      // 2. Processa links dentro do elemento
+      const links = element.querySelectorAll('a[href]');
+      links.forEach(link => this.processLink(link as HTMLAnchorElement));
+
+      // 3. Se o elemento tiver um Shadow Root, varre-o recursivamente
+      if (element.shadowRoot) {
+        this.scanNodeAndShadows(element.shadowRoot);
+      }
+
+      // 4. Varre todos os descendentes do elemento atual
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT);
+      while(walker.nextNode()) {
+        const currentNode = walker.currentNode as Element;
+        if (currentNode.shadowRoot) {
+          this.scanNodeAndShadows(currentNode.shadowRoot);
+        }
+      }
+    }
   }
 
   /**
